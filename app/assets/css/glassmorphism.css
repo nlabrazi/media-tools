@@ -1,0 +1,32 @@
+/*
+  Effets glassmorphism pour les cartes et surfaces.
+*/
+.glass-card {
+  background: var(--bg-glass, rgba(25, 25, 50, 0.5));
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card-hover {
+  @apply transition-all duration-300;
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 212, 255, 0.2);
+  transform: translateY(-4px);
+}
+
+.glass-input {
+  background: rgba(25, 25, 50, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  @apply rounded-xl px-4 py-3 text-white placeholder-gray-400 outline-none transition-all duration-300 w-full;
+}
+
+.glass-input:focus {
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+}

@@ -1,0 +1,39 @@
+/*
+  Effets néon pour les textes et bordures.
+*/
+.neon-text-blue {
+  text-shadow: 0 0 10px #00d4ff, 0 0 30px rgba(0, 212, 255, 0.5), 0 0 60px rgba(0, 212, 255, 0.3);
+}
+
+.neon-text-purple {
+  text-shadow: 0 0 10px #b366ff, 0 0 30px rgba(179, 102, 255, 0.5);
+}
+
+.neon-text-pink {
+  text-shadow: 0 0 10px #ff2d95, 0 0 30px rgba(255, 45, 149, 0.5);
+}
+
+.neon-border {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.neon-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #00d4ff, #b366ff, #ff2d95);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.neon-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #00d4ff, #b366ff, transparent);
+  width: 100%;
+}

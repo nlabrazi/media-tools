@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  media-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: media-tools
+    image: media-tools
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
