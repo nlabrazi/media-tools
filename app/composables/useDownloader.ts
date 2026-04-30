@@ -4,6 +4,7 @@
 */
 import type { Tool } from '~/data/tools'
 import type { DownloadPlatform, DownloadResponse } from '~/shared/types/download'
+import { getDownloadErrorMessage } from '~/shared/utils/download-error'
 import { assertValidUrlForPlatform, isDownloadPlatform } from '~/shared/utils/download-validation'
 import type { Notification } from './useNotification'
 import { useNotification } from './useNotification'
@@ -61,8 +62,8 @@ export const useDownloader = (tool: Ref<Tool>) => {
 
       result.value = response.data
       addNotification({ type: 'success', message: 'Média trouvé ! Choisissez la qualité.' })
-    } catch {
-      error.value = "Impossible d'analyser ce média pour le moment."
+    } catch (requestError) {
+      error.value = getDownloadErrorMessage(requestError)
       addNotification({ type: 'error', message: error.value })
     } finally {
       isLoading.value = false
