@@ -7,6 +7,15 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  runtimeConfig: {
+    download: {
+      analyzeRateLimit: {
+        limit: 10,
+        windowMs: 60_000,
+      },
+    },
+  },
+
   modules: ['@nuxtjs/tailwindcss'],
 
   components: [

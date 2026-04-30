@@ -1,22 +1,51 @@
 import { type H3Event, createError, getRequestIP, readBody, setResponseHeader } from 'h3'
 import type { DownloadRequest, DownloadResponse } from '~/shared/types/download'
+import { useRuntimeConfig } from '#imports'
 import {
   DownloadAnalysisError,
   buildDownloadAnalysisResponse,
   downloadAnalysisErrorMessages,
 } from './download-analysis'
+import { normalizeDownloadAnalyzeRateLimitConfig } from './download-rate-limit-config'
 import { createFixedWindowRateLimiter } from './rate-limit'
 
-const downloadAnalyzeRateLimiter = createFixedWindowRateLimiter({
-  limit: 10,
-  windowMs: 60_000,
-})
+type DownloadRuntimeConfig = {
+  download?: {
+    analyzeRateLimit?: unknown
+  }
+}
+
+const downloadAnalyzeRateLimiters = new Map<
+  string,
+  ReturnType<typeof createFixedWindowRateLimiter>
+>()
+
+const getDownloadAnalyzeRateLimiter = (
+  config: ReturnType<typeof normalizeDownloadAnalyzeRateLimitConfig>,
+) => {
+  const limiterKey = `${config.limit}:${config.windowMs}`
+  const existingLimiter = downloadAnalyzeRateLimiters.get(limiterKey)
+
+  if (existingLimiter) {
+    return existingLimiter
+  }
+
+  const limiter = createFixedWindowRateLimiter(config)
+  downloadAnalyzeRateLimiters.set(limiterKey, limiter)
+
+  return limiter
+}
 
 export const handleDownloadAnalysisRequest = async (event: H3Event): Promise<DownloadResponse> => {
+  const runtimeConfig = useRuntimeConfig(event) as DownloadRuntimeConfig
+  const rateLimitConfig = normalizeDownloadAnalyzeRateLimitConfig(
+    runtimeConfig.download?.analyzeRateLimit,
+  )
+  const downloadAnalyzeRateLimiter = getDownloadAnalyzeRateLimiter(rateLimitConfig)
   const clientIp = getRequestIP(event, { xForwardedFor: true }) || 'anonymous'
   const rateLimit = downloadAnalyzeRateLimiter.check(clientIp)
 
-  setResponseHeader(event, 'X-RateLimit-Limit', '10')
+  setResponseHeader(event, 'X-RateLimit-Limit', rateLimitConfig.limit.toString())
   setResponseHeader(event, 'X-RateLimit-Remaining', rateLimit.remaining.toString())
   setResponseHeader(event, 'X-RateLimit-Reset', Math.ceil(rateLimit.resetAt / 1000).toString())
 
