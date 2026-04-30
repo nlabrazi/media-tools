@@ -8,6 +8,12 @@ export interface DownloadRequest {
   quality?: string
 }
 
+export interface DownloadFormat {
+  id: string
+  label: string
+  type: 'audio' | 'gif' | 'image' | 'video'
+}
+
 export interface DownloadFile {
   url: string
   preview: string
@@ -15,6 +21,7 @@ export interface DownloadFile {
   downloadUrl: string
   filename: string
   quality: string
+  formats: DownloadFormat[]
   fileSize: string
 }
 

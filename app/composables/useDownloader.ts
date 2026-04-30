@@ -5,6 +5,7 @@
 import type { Tool } from '~/data/tools'
 import type { DownloadPlatform, DownloadResponse } from '~/shared/types/download'
 import { getDownloadErrorMessage } from '~/shared/utils/download-error'
+import { findDownloadFormat, getDefaultDownloadFormat } from '~/shared/utils/download-format'
 import { assertValidUrlForPlatform, isDownloadPlatform } from '~/shared/utils/download-validation'
 import type { Notification } from './useNotification'
 import { useNotification } from './useNotification'
@@ -36,6 +37,7 @@ export const useDownloader = (tool: Ref<Tool>) => {
   const fetchInfo = async () => {
     error.value = null
     result.value = null
+    selectedQuality.value = ''
 
     if (!url.value.trim()) {
       error.value = 'Veuillez entrer une URL.'
@@ -56,11 +58,12 @@ export const useDownloader = (tool: Ref<Tool>) => {
         body: {
           url: url.value,
           platform: tool.value.id as DownloadPlatform,
-          quality: selectedQuality.value || undefined,
+          quality: undefined,
         },
       })
 
       result.value = response.data
+      selectedQuality.value = getDefaultDownloadFormat(response.data.formats)?.id || ''
       addNotification({ type: 'success', message: 'Média trouvé ! Choisissez la qualité.' })
     } catch (requestError) {
       error.value = getDownloadErrorMessage(requestError)
@@ -68,6 +71,23 @@ export const useDownloader = (tool: Ref<Tool>) => {
     } finally {
       isLoading.value = false
       removeNotificationFromComposable()
+    }
+  }
+
+  const selectFormat = (formatId: string) => {
+    selectedQuality.value = formatId
+
+    if (!result.value) {
+      return
+    }
+
+    const selectedFormat = findDownloadFormat(result.value.formats, formatId)
+
+    if (selectedFormat) {
+      result.value = {
+        ...result.value,
+        quality: selectedFormat.label,
+      }
     }
   }
 
@@ -92,6 +112,7 @@ export const useDownloader = (tool: Ref<Tool>) => {
     result,
     error,
     selectedQuality,
+    selectFormat,
     fetchInfo,
     resetForm,
     validateUrl,

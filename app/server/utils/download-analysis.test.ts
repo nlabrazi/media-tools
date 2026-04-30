@@ -56,6 +56,13 @@ describe('download analysis', () => {
       platform: 'youtube',
       filename: 'youtube_video_2026.mp4',
       quality: '1080p',
+      formats: [
+        { id: 'youtube-1080p', label: '1080p', type: 'video' },
+        { id: 'youtube-720p', label: '720p', type: 'video' },
+        { id: 'youtube-480p', label: '480p', type: 'video' },
+        { id: 'youtube-mp3-320', label: 'MP3 320kbps', type: 'audio' },
+        { id: 'youtube-mp3-128', label: 'MP3 128kbps', type: 'audio' },
+      ],
     })
   })
 
