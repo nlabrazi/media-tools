@@ -23,7 +23,7 @@
     <DownloaderForm v-model:url="url" :tool="tool" :is-loading="isLoading" :error="error" @fetch="fetchInfo" />
 
     <div v-if="result" class="mt-8">
-      <DownloaderPreview :result="result">
+      <DownloaderPreview :is-downloading="isDownloading" :result="result" @download="startDownload">
         <template #quality-selector>
           <QualitySelector
             v-if="result.formats.length > 1"
@@ -46,6 +46,15 @@ const props = defineProps<{
 
 const toolRef = computed(() => props.tool)
 
-const { url, isLoading, result, error, selectedQuality, selectFormat, fetchInfo } =
-  useDownloader(toolRef)
+const {
+  url,
+  isLoading,
+  isDownloading,
+  result,
+  error,
+  selectedQuality,
+  selectFormat,
+  startDownload,
+  fetchInfo,
+} = useDownloader(toolRef)
 </script>

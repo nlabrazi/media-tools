@@ -44,4 +44,10 @@ describe('download error message', () => {
     )
     expect(getDownloadErrorMessage(null)).toBe("Impossible d'analyser ce média pour le moment.")
   })
+
+  it('accepts a contextual fallback message', () => {
+    expect(
+      getDownloadErrorMessage(new Error('Internal stack detail'), 'Téléchargement impossible.'),
+    ).toBe('Téléchargement impossible.')
+  })
 })

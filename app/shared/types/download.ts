@@ -30,6 +30,24 @@ export interface DownloadAnalysisResponse {
   data: DownloadAnalysisResult
 }
 
+export interface DownloadStartRequest {
+  url: string
+  platform: DownloadPlatform
+  formatId: string
+}
+
+export interface DownloadStartResult {
+  downloadUrl: string
+  expiresAt: string
+  filename: string
+  format: DownloadFormat
+}
+
+export interface DownloadStartResponse {
+  success: true
+  data: DownloadStartResult
+}
+
 export type DownloadRequest = DownloadAnalysisRequest
 export type DownloadFile = DownloadAnalysisResult
 export type DownloadResponse = DownloadAnalysisResponse

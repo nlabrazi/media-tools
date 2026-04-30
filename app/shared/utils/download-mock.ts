@@ -54,6 +54,10 @@ const mockDownloadPresets: Record<DownloadPlatform, MockDownloadPreset> = {
   },
 }
 
+export const getMockDownloadFormats = (platform: DownloadPlatform): DownloadFormat[] => {
+  return mockDownloadPresets[platform].formats
+}
+
 export const buildMockDownloadAnalysisResponse = (
   request: DownloadAnalysisRequest,
 ): DownloadAnalysisResponse => {

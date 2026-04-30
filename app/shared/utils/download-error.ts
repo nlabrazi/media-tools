@@ -13,9 +13,12 @@ const getStringProperty = (value: unknown, property: string): string | null => {
   return typeof propertyValue === 'string' && propertyValue.trim() ? propertyValue : null
 }
 
-export const getDownloadErrorMessage = (error: unknown): string => {
+export const getDownloadErrorMessage = (
+  error: unknown,
+  fallbackMessage = fallbackDownloadErrorMessage,
+): string => {
   if (!isRecord(error)) {
-    return fallbackDownloadErrorMessage
+    return fallbackMessage
   }
 
   const dataMessage =
@@ -33,5 +36,5 @@ export const getDownloadErrorMessage = (error: unknown): string => {
     return 'Trop de tentatives. Réessayez dans quelques instants.'
   }
 
-  return fallbackDownloadErrorMessage
+  return fallbackMessage
 }

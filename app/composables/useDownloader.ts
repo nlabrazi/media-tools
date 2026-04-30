@@ -3,7 +3,11 @@
   Pour la V1 : appelle l'API Nuxt qui retourne encore un mock serveur.
 */
 import type { Tool } from '~/data/tools'
-import type { DownloadAnalysisResponse, DownloadPlatform } from '~/shared/types/download'
+import type {
+  DownloadAnalysisResponse,
+  DownloadPlatform,
+  DownloadStartResponse,
+} from '~/shared/types/download'
 import { getDownloadErrorMessage } from '~/shared/utils/download-error'
 import { findDownloadFormat, getDefaultDownloadFormat } from '~/shared/utils/download-format'
 import { assertValidUrlForPlatform, isDownloadPlatform } from '~/shared/utils/download-validation'
@@ -15,6 +19,7 @@ export type DownloadResult = DownloadAnalysisResponse['data']
 export const useDownloader = (tool: Ref<Tool>) => {
   const url = ref('')
   const isLoading = ref(false)
+  const isDownloading = ref(false)
   const result = ref<DownloadResult | null>(null)
   const error = ref<string | null>(null)
   const selectedQuality = ref('')
@@ -91,6 +96,51 @@ export const useDownloader = (tool: Ref<Tool>) => {
     }
   }
 
+  const triggerBrowserDownload = (downloadUrl: string, filename: string) => {
+    if (!import.meta.client) {
+      return
+    }
+
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = filename
+    link.rel = 'noopener'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  }
+
+  const startDownload = async () => {
+    if (!result.value) {
+      return
+    }
+
+    error.value = null
+    isDownloading.value = true
+
+    try {
+      const response = await $fetch<DownloadStartResponse>('/api/download/start', {
+        method: 'POST',
+        body: {
+          url: result.value.url,
+          platform: result.value.platform,
+          formatId: selectedQuality.value,
+        },
+      })
+
+      triggerBrowserDownload(response.data.downloadUrl, response.data.filename)
+      addNotification({ type: 'success', message: 'Téléchargement prêt.' })
+    } catch (requestError) {
+      error.value = getDownloadErrorMessage(
+        requestError,
+        'Impossible de préparer le téléchargement pour le moment.',
+      )
+      addNotification({ type: 'error', message: error.value })
+    } finally {
+      isDownloading.value = false
+    }
+  }
+
   const removeNotificationFromComposable = () => {
     // Accès au state partagé
     const { removeNotification: remove } = useNotification()
@@ -109,10 +159,12 @@ export const useDownloader = (tool: Ref<Tool>) => {
   return {
     url,
     isLoading,
+    isDownloading,
     result,
     error,
     selectedQuality,
     selectFormat,
+    startDownload,
     fetchInfo,
     resetForm,
     validateUrl,
