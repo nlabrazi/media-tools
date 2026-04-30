@@ -4,6 +4,7 @@
   À remplacer par le vrai service de téléchargement.
 */
 import type { DownloadRequest, DownloadResponse } from '~/shared/types/download'
+import { buildMockDownloadResponse } from '~/shared/utils/download-mock'
 import {
   DownloadValidationError,
   assertValidUrlForPlatform,
@@ -51,16 +52,9 @@ export default defineEventHandler(async (event): Promise<DownloadResponse> => {
   // Simulation de temps de traitement
   await new Promise((resolve) => setTimeout(resolve, 1500))
 
-  // Mock response
-  return {
-    success: true,
-    data: {
-      url: cleanUrl,
-      platform: body.platform,
-      downloadUrl: '#',
-      filename: `media_${Date.now()}.mp4`,
-      quality: body.quality || '1080p',
-      fileSize: '15.7 MB',
-    },
-  }
+  return buildMockDownloadResponse({
+    url: cleanUrl,
+    platform: body.platform,
+    quality: body.quality,
+  })
 })

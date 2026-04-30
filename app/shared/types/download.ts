@@ -10,6 +10,7 @@ export interface DownloadRequest {
 
 export interface DownloadFile {
   url: string
+  preview: string
   platform: DownloadPlatform
   downloadUrl: string
   filename: string
