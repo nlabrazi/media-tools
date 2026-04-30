@@ -9,6 +9,7 @@ export interface DownloadAnalysisRequest {
 }
 
 export interface DownloadFormat {
+  extension?: string
   id: string
   label: string
   type: 'audio' | 'gif' | 'image' | 'video'

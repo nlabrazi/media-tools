@@ -13,6 +13,7 @@ export default defineNuxtConfig({
         limit: 10,
         windowMs: 60_000,
       },
+      ytDlpPath: 'yt-dlp',
     },
   },
 

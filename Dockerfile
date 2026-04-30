@@ -13,6 +13,11 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+RUN apk add --no-cache ca-certificates ffmpeg py3-pip python3 \
+  && python3 -m venv /opt/yt-dlp \
+  && /opt/yt-dlp/bin/pip install --no-cache-dir yt-dlp \
+  && ln -s /opt/yt-dlp/bin/yt-dlp /usr/local/bin/yt-dlp
+
 COPY --from=build /app/.output ./.output
 COPY package*.json ./
 

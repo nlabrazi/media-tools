@@ -1,10 +1,12 @@
 import { type H3Event, createError, getRequestIP, readBody, setResponseHeader } from 'h3'
 import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
 import { useRuntimeConfig } from '#imports'
+import { YouTubeDownloaderError, analyzeYouTubeDownload } from '../services/downloaders/youtube'
 import {
   DownloadAnalysisError,
   buildDownloadAnalysisResponse,
   downloadAnalysisErrorMessages,
+  parseDownloadAnalysisRequest,
 } from './download-analysis'
 import { normalizeDownloadAnalyzeRateLimitConfig } from './download-rate-limit-config'
 import { createFixedWindowRateLimiter } from './rate-limit'
@@ -12,6 +14,7 @@ import { createFixedWindowRateLimiter } from './rate-limit'
 type DownloadRuntimeConfig = {
   download?: {
     analyzeRateLimit?: unknown
+    ytDlpPath?: string
   }
 }
 
@@ -61,10 +64,18 @@ export const handleDownloadAnalysisRequest = async (
   const body = await readBody<Partial<DownloadAnalysisRequest>>(event)
 
   try {
-    const response = buildDownloadAnalysisResponse(body)
+    const request = parseDownloadAnalysisRequest(body)
+    const response =
+      request.platform === 'youtube'
+        ? await analyzeYouTubeDownload(request, {
+            executablePath: runtimeConfig.download?.ytDlpPath,
+          })
+        : buildDownloadAnalysisResponse(request)
 
     // Simulation de temps de traitement
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    if (request.platform !== 'youtube') {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+    }
 
     return response
   } catch (error) {
@@ -72,6 +83,13 @@ export const handleDownloadAnalysisRequest = async (
       throw createError({
         statusCode: 400,
         statusMessage: downloadAnalysisErrorMessages[error.code],
+      })
+    }
+
+    if (error instanceof YouTubeDownloaderError) {
+      throw createError({
+        statusCode: 503,
+        statusMessage: "Le service d'analyse YouTube est temporairement indisponible.",
       })
     }
 

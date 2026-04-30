@@ -35,13 +35,15 @@ export class DownloadStartError extends Error {
   }
 }
 
-interface ParsedDownloadStartRequest extends DownloadStartRequest {
+export interface ParsedDownloadStartBaseRequest extends DownloadStartRequest {}
+
+interface ParsedDownloadStartRequest extends ParsedDownloadStartBaseRequest {
   format: DownloadFormat
 }
 
-export const parseDownloadStartRequest = (
+export const parseDownloadStartBaseRequest = (
   body: Partial<DownloadStartRequest>,
-): ParsedDownloadStartRequest => {
+): ParsedDownloadStartBaseRequest => {
   if (typeof body.url !== 'string' || !body.url.trim()) {
     throw new DownloadStartError('URL_REQUIRED')
   }
@@ -66,15 +68,28 @@ export const parseDownloadStartRequest = (
     throw error
   }
 
-  const format = findDownloadFormat(getMockDownloadFormats(body.platform), body.formatId)
+  return {
+    url: cleanUrl,
+    platform: body.platform,
+    formatId: body.formatId.trim(),
+  }
+}
+
+export const parseDownloadStartRequest = (
+  body: Partial<DownloadStartRequest>,
+): ParsedDownloadStartRequest => {
+  const baseRequest = parseDownloadStartBaseRequest(body)
+  const format = findDownloadFormat(
+    getMockDownloadFormats(baseRequest.platform),
+    baseRequest.formatId,
+  )
 
   if (!format) {
     throw new DownloadStartError('FORMAT_UNSUPPORTED')
   }
 
   return {
-    url: cleanUrl,
-    platform: body.platform,
+    ...baseRequest,
     formatId: format.id,
     format,
   }

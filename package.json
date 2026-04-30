@@ -19,6 +19,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@nuxtjs/tailwindcss": "^6.13.2",
+    "@types/node": "^20.19.39",
     "typescript": "^5.7.0",
     "vitest": "^4.1.5"
   }

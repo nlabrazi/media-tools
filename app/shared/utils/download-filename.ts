@@ -12,5 +12,5 @@ export const buildDownloadFilename = (
   format: DownloadFormat,
   timestamp = Date.now(),
 ): string => {
-  return `${platform}_${format.id}_${timestamp}.${extensionByFormatType[format.type]}`
+  return `${platform}_${format.id}_${timestamp}.${format.extension || extensionByFormatType[format.type]}`
 }
