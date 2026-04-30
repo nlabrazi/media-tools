@@ -43,6 +43,6 @@ const stats = [
   { value: '10M+', label: 'Téléchargements' },
   { value: '4', label: 'Plateformes' },
   { value: '1080p', label: 'Qualité max' },
-  { value: '100%', label: 'Gratuit' }
+  { value: '100%', label: 'Gratuit' },
 ]
 </script>

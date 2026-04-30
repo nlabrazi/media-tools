@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   components: [
     { path: '../components/global', pathPrefix: false },
     { path: '../components/home', pathPrefix: false },
-    { path: '../components/downloader', pathPrefix: false }
+    { path: '../components/downloader', pathPrefix: false },
   ],
 
   css: [
@@ -20,7 +20,7 @@ export default defineNuxtConfig({
     '~/assets/css/glassmorphism.css',
     '~/assets/css/neon.css',
     '~/assets/css/particles.css',
-    '~/assets/css/buttons.css'
+    '~/assets/css/buttons.css',
   ],
 
   app: {
@@ -31,17 +31,18 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content: 'Téléchargez vos vidéos et photos depuis Instagram, TikTok, YouTube et Twitter gratuitement.'
-        }
+          content:
+            'Téléchargez vos vidéos et photos depuis Instagram, TikTok, YouTube et Twitter gratuitement.',
+        },
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap'
-        }
-      ]
-    }
-  }
-});
+          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap',
+        },
+      ],
+    },
+  },
+})

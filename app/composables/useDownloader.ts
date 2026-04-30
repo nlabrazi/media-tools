@@ -76,7 +76,7 @@ export const useDownloader = (tool: Ref<Tool>) => {
           'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=400&fit=crop',
         filename: 'instagram_photo_2026.jpg',
         quality: '1080x1350',
-        fileSize: '2.4 MB'
+        fileSize: '2.4 MB',
       },
       tiktok: {
         url: '#',
@@ -84,14 +84,15 @@ export const useDownloader = (tool: Ref<Tool>) => {
           'https://images.unsplash.com/photo-1611605698323-b1e99cfd37ea?w=400&h=600&fit=crop',
         filename: 'tiktok_video_2026.mp4',
         quality: '1080p (sans watermark)',
-        fileSize: '15.7 MB'
+        fileSize: '15.7 MB',
       },
       youtube: {
         url: '#',
-        preview: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=600&h=400&fit=crop',
+        preview:
+          'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=600&h=400&fit=crop',
         filename: 'youtube_video_2026.mp4',
         quality: '1080p',
-        fileSize: '128 MB'
+        fileSize: '128 MB',
       },
       twitter: {
         url: '#',
@@ -99,8 +100,8 @@ export const useDownloader = (tool: Ref<Tool>) => {
           'https://images.unsplash.com/photo-1611605698335-53a9e1b0e1f7?w=400&h=400&fit=crop',
         filename: 'twitter_video_2026.mp4',
         quality: '720p',
-        fileSize: '8.2 MB'
-      }
+        fileSize: '8.2 MB',
+      },
     }
 
     result.value = mockResults[tool.value.id] || null
@@ -133,6 +134,6 @@ export const useDownloader = (tool: Ref<Tool>) => {
     selectedQuality,
     fetchInfo,
     resetForm,
-    validateUrl
+    validateUrl,
   }
 }
