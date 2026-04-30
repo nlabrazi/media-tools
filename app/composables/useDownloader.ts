@@ -51,7 +51,7 @@ export const useDownloader = (tool: Ref<Tool>) => {
     addNotification({ type: 'loading', message: 'Analyse du lien en cours...', duration: 0 })
 
     try {
-      const response = await $fetch<DownloadResponse>('/api/download', {
+      const response = await $fetch<DownloadResponse>('/api/download/analyze', {
         method: 'POST',
         body: {
           url: url.value,
