@@ -1,5 +1,5 @@
 import { type H3Event, createError, getRequestIP, readBody, setResponseHeader } from 'h3'
-import type { DownloadRequest, DownloadResponse } from '~/shared/types/download'
+import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
 import { useRuntimeConfig } from '#imports'
 import {
   DownloadAnalysisError,
@@ -36,7 +36,9 @@ const getDownloadAnalyzeRateLimiter = (
   return limiter
 }
 
-export const handleDownloadAnalysisRequest = async (event: H3Event): Promise<DownloadResponse> => {
+export const handleDownloadAnalysisRequest = async (
+  event: H3Event,
+): Promise<DownloadAnalysisResponse> => {
   const runtimeConfig = useRuntimeConfig(event) as DownloadRuntimeConfig
   const rateLimitConfig = normalizeDownloadAnalyzeRateLimitConfig(
     runtimeConfig.download?.analyzeRateLimit,
@@ -56,7 +58,7 @@ export const handleDownloadAnalysisRequest = async (event: H3Event): Promise<Dow
     })
   }
 
-  const body = await readBody<Partial<DownloadRequest>>(event)
+  const body = await readBody<Partial<DownloadAnalysisRequest>>(event)
 
   try {
     const response = buildDownloadAnalysisResponse(body)

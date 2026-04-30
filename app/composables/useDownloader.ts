@@ -3,14 +3,14 @@
   Pour la V1 : appelle l'API Nuxt qui retourne encore un mock serveur.
 */
 import type { Tool } from '~/data/tools'
-import type { DownloadPlatform, DownloadResponse } from '~/shared/types/download'
+import type { DownloadAnalysisResponse, DownloadPlatform } from '~/shared/types/download'
 import { getDownloadErrorMessage } from '~/shared/utils/download-error'
 import { findDownloadFormat, getDefaultDownloadFormat } from '~/shared/utils/download-format'
 import { assertValidUrlForPlatform, isDownloadPlatform } from '~/shared/utils/download-validation'
 import type { Notification } from './useNotification'
 import { useNotification } from './useNotification'
 
-export type DownloadResult = DownloadResponse['data']
+export type DownloadResult = DownloadAnalysisResponse['data']
 
 export const useDownloader = (tool: Ref<Tool>) => {
   const url = ref('')
@@ -53,7 +53,7 @@ export const useDownloader = (tool: Ref<Tool>) => {
     addNotification({ type: 'loading', message: 'Analyse du lien en cours...', duration: 0 })
 
     try {
-      const response = await $fetch<DownloadResponse>('/api/download/analyze', {
+      const response = await $fetch<DownloadAnalysisResponse>('/api/download/analyze', {
         method: 'POST',
         body: {
           url: url.value,

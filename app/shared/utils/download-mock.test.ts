@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildMockDownloadResponse } from './download-mock'
+import { buildMockDownloadAnalysisResponse } from './download-mock'
 
 describe('download mock response', () => {
   it('builds a platform-specific mocked API response expected by the downloader UI', () => {
-    const response = buildMockDownloadResponse({
+    const response = buildMockDownloadAnalysisResponse({
       url: 'https://youtu.be/demo',
       platform: 'youtube',
     })
@@ -31,7 +31,7 @@ describe('download mock response', () => {
   })
 
   it('keeps the requested quality when one is provided', () => {
-    const response = buildMockDownloadResponse({
+    const response = buildMockDownloadAnalysisResponse({
       url: 'https://youtu.be/demo',
       platform: 'youtube',
       quality: 'youtube-720p',
@@ -42,7 +42,7 @@ describe('download mock response', () => {
 
   it('uses a different preset for each platform', () => {
     expect(
-      buildMockDownloadResponse({
+      buildMockDownloadAnalysisResponse({
         url: 'https://instagram.com/p/demo',
         platform: 'instagram',
       }).data,
@@ -57,7 +57,7 @@ describe('download mock response', () => {
     })
 
     expect(
-      buildMockDownloadResponse({
+      buildMockDownloadAnalysisResponse({
         url: 'https://vm.tiktok.com/demo',
         platform: 'tiktok',
       }).data,
@@ -73,7 +73,7 @@ describe('download mock response', () => {
     })
 
     expect(
-      buildMockDownloadResponse({
+      buildMockDownloadAnalysisResponse({
         url: 'https://x.com/user/status/1',
         platform: 'twitter',
       }).data,

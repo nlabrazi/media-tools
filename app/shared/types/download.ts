@@ -2,7 +2,7 @@ export const downloadPlatforms = ['instagram', 'tiktok', 'youtube', 'twitter'] a
 
 export type DownloadPlatform = (typeof downloadPlatforms)[number]
 
-export interface DownloadRequest {
+export interface DownloadAnalysisRequest {
   url: string
   platform: DownloadPlatform
   quality?: string
@@ -14,7 +14,7 @@ export interface DownloadFormat {
   type: 'audio' | 'gif' | 'image' | 'video'
 }
 
-export interface DownloadFile {
+export interface DownloadAnalysisResult {
   url: string
   preview: string
   platform: DownloadPlatform
@@ -25,7 +25,11 @@ export interface DownloadFile {
   fileSize: string
 }
 
-export interface DownloadResponse {
+export interface DownloadAnalysisResponse {
   success: true
-  data: DownloadFile
+  data: DownloadAnalysisResult
 }
+
+export type DownloadRequest = DownloadAnalysisRequest
+export type DownloadFile = DownloadAnalysisResult
+export type DownloadResponse = DownloadAnalysisResponse

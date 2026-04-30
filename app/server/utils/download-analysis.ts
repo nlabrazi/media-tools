@@ -1,5 +1,5 @@
-import type { DownloadRequest, DownloadResponse } from '~/shared/types/download'
-import { buildMockDownloadResponse } from '~/shared/utils/download-mock'
+import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
+import { buildMockDownloadAnalysisResponse } from '~/shared/utils/download-mock'
 import {
   DownloadValidationError,
   assertValidUrlForPlatform,
@@ -25,7 +25,9 @@ export class DownloadAnalysisError extends Error {
   }
 }
 
-export const parseDownloadAnalysisRequest = (body: Partial<DownloadRequest>): DownloadRequest => {
+export const parseDownloadAnalysisRequest = (
+  body: Partial<DownloadAnalysisRequest>,
+): DownloadAnalysisRequest => {
   if (typeof body.url !== 'string' || !body.url.trim()) {
     throw new DownloadAnalysisError('URL_REQUIRED')
   }
@@ -53,6 +55,8 @@ export const parseDownloadAnalysisRequest = (body: Partial<DownloadRequest>): Do
   }
 }
 
-export const buildDownloadAnalysisResponse = (body: Partial<DownloadRequest>): DownloadResponse => {
-  return buildMockDownloadResponse(parseDownloadAnalysisRequest(body))
+export const buildDownloadAnalysisResponse = (
+  body: Partial<DownloadAnalysisRequest>,
+): DownloadAnalysisResponse => {
+  return buildMockDownloadAnalysisResponse(parseDownloadAnalysisRequest(body))
 }

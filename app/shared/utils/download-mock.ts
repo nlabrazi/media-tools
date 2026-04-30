@@ -1,13 +1,13 @@
 import type {
-  DownloadFile,
+  DownloadAnalysisRequest,
+  DownloadAnalysisResponse,
+  DownloadAnalysisResult,
   DownloadFormat,
   DownloadPlatform,
-  DownloadRequest,
-  DownloadResponse,
 } from '~/shared/types/download'
 import { findDownloadFormat, getDefaultDownloadFormat } from './download-format'
 
-type MockDownloadPreset = Pick<DownloadFile, 'preview' | 'filename' | 'fileSize'> & {
+type MockDownloadPreset = Pick<DownloadAnalysisResult, 'preview' | 'filename' | 'fileSize'> & {
   formats: DownloadFormat[]
 }
 
@@ -54,7 +54,9 @@ const mockDownloadPresets: Record<DownloadPlatform, MockDownloadPreset> = {
   },
 }
 
-export const buildMockDownloadResponse = (request: DownloadRequest): DownloadResponse => {
+export const buildMockDownloadAnalysisResponse = (
+  request: DownloadAnalysisRequest,
+): DownloadAnalysisResponse => {
   const preset = mockDownloadPresets[request.platform]
   const selectedFormat =
     findDownloadFormat(preset.formats, request.quality) || getDefaultDownloadFormat(preset.formats)
@@ -73,3 +75,5 @@ export const buildMockDownloadResponse = (request: DownloadRequest): DownloadRes
     },
   }
 }
+
+export const buildMockDownloadResponse = buildMockDownloadAnalysisResponse
