@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "lint": "biome check .",
     "format": "biome format . --write",
-    "typecheck": "nuxi typecheck"
+    "typecheck": "nuxi typecheck",
+    "test": "vitest run"
   },
   "dependencies": {
     "nuxt": "^4.0.0",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@nuxtjs/tailwindcss": "^6.13.2",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.5"
   }
 }

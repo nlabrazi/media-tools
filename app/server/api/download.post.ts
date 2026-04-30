@@ -3,53 +3,17 @@
   Actuellement, valide la requête puis retourne un mock.
   À remplacer par le vrai service de téléchargement.
 */
+import type { DownloadRequest, DownloadResponse } from '~/shared/types/download'
 import {
-  type DownloadPlatform,
-  type DownloadRequest,
-  type DownloadResponse,
-  downloadPlatforms,
-} from '~/shared/types/download'
+  DownloadValidationError,
+  assertValidUrlForPlatform,
+  isDownloadPlatform,
+} from '~/shared/utils/download-validation'
 
-const platformHosts: Record<DownloadPlatform, string[]> = {
-  instagram: ['instagram.com'],
-  tiktok: ['tiktok.com', 'vm.tiktok.com'],
-  youtube: ['youtube.com', 'youtu.be'],
-  twitter: ['twitter.com', 'x.com'],
-}
-
-const isDownloadPlatform = (platform: unknown): platform is DownloadPlatform => {
-  return typeof platform === 'string' && downloadPlatforms.includes(platform as DownloadPlatform)
-}
-
-const normalizeHostname = (hostname: string) => hostname.replace(/^www\./, '')
-
-const assertValidUrlForPlatform = (url: string, platform: DownloadPlatform) => {
-  let parsedUrl: URL
-
-  try {
-    parsedUrl = new URL(url)
-  } catch {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'URL invalide.',
-    })
-  }
-
-  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Protocole URL non supporté.',
-    })
-  }
-
-  const hostname = normalizeHostname(parsedUrl.hostname)
-
-  if (!platformHosts[platform].includes(hostname)) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Cette URL ne correspond pas à la plateforme demandée.',
-    })
-  }
+const validationErrorMessages: Record<DownloadValidationError['code'], string> = {
+  INVALID_URL: 'URL invalide.',
+  UNSUPPORTED_PROTOCOL: 'Protocole URL non supporté.',
+  PLATFORM_HOST_MISMATCH: 'Cette URL ne correspond pas à la plateforme demandée.',
 }
 
 export default defineEventHandler(async (event): Promise<DownloadResponse> => {
@@ -70,7 +34,19 @@ export default defineEventHandler(async (event): Promise<DownloadResponse> => {
   }
 
   const cleanUrl = body.url.trim()
-  assertValidUrlForPlatform(cleanUrl, body.platform)
+
+  try {
+    assertValidUrlForPlatform(cleanUrl, body.platform)
+  } catch (error) {
+    if (error instanceof DownloadValidationError) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: validationErrorMessages[error.code],
+      })
+    }
+
+    throw error
+  }
 
   // Simulation de temps de traitement
   await new Promise((resolve) => setTimeout(resolve, 1500))
