@@ -12,9 +12,9 @@
         rendre le contenu accessible à tous, sans limite et sans inscription.
       </p>
       <p>
-        Actuellement en <strong>version 1.0</strong>, les téléchargements YouTube et TikTok sont
-        branchés côté backend. Instagram et Twitter/X sont préparés dans l'interface et seront
-        activés progressivement.
+        Actuellement en <strong>version 1.0</strong>, les téléchargements YouTube, TikTok et
+        Twitter/X sont branchés côté backend. Instagram est préparé dans l'interface et sera activé
+        progressivement si un support fiable est possible.
       </p>
       <p class="text-cyber-blue">Restez connectés !</p>
     </div>

@@ -1,4 +1,9 @@
 import { execFile, spawn } from 'node:child_process'
+import { createReadStream } from 'node:fs'
+import type { ReadStream } from 'node:fs'
+import { mkdtemp, rm, stat } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import type { Readable } from 'node:stream'
 import type {
   DownloadAnalysisResult,
@@ -28,6 +33,7 @@ export interface YtDlpDownloaderOptions {
 export interface YtDlpFormat {
   abr?: number
   acodec?: string
+  audio_ext?: string
   ext?: string
   filesize?: number
   filesize_approx?: number
@@ -36,13 +42,27 @@ export interface YtDlpFormat {
   protocol?: string
   tbr?: number
   url?: string
+  video_ext?: string
   vcodec?: string
+  width?: number
 }
 
 export interface YtDlpMetadata {
   formats?: YtDlpFormat[]
+  requested_downloads?: YtDlpFormat[]
   thumbnail?: string
   title?: string
+}
+
+export interface YtDlpPreparedDownload {
+  cleanup: () => Promise<void>
+  filePath: string
+  size: number
+  stream: ReadStream
+}
+
+interface YtDlpFormatMappingOptions {
+  includeDirectVideoOnlyFormats?: boolean
 }
 
 const defaultYtDlpDownloaderOptions: Required<YtDlpDownloaderOptions> = {
@@ -148,6 +168,80 @@ export const getYtDlpFormatUrl = async (
   return downloadUrl
 }
 
+export const prepareYtDlpFormatDownload = async (
+  url: string,
+  formatId: string,
+  options: YtDlpDownloaderOptions = {},
+): Promise<YtDlpPreparedDownload> => {
+  const downloaderOptions = normalizeYtDlpDownloaderOptions(options)
+  const directory = await mkdtemp(join(tmpdir(), 'media-tools-download-'))
+  const filePath = join(directory, 'download')
+
+  await new Promise<void>((resolve, reject) => {
+    const childProcess = spawn(
+      downloaderOptions.executablePath,
+      ['--no-playlist', '--no-warnings', '-f', formatId, '-o', filePath, url],
+      {
+        stdio: ['ignore', 'ignore', 'pipe'],
+      },
+    )
+
+    const timeout = setTimeout(() => {
+      childProcess.kill('SIGTERM')
+      reject(new YtDlpDownloaderError('SERVICE_TIMEOUT'))
+    }, downloaderOptions.timeoutMs)
+
+    const cleanupProcess = () => {
+      clearTimeout(timeout)
+    }
+
+    const rejectWithServiceError = () => {
+      cleanupProcess()
+      reject(new YtDlpDownloaderError('SERVICE_UNAVAILABLE'))
+    }
+
+    childProcess.stderr.resume()
+
+    childProcess.once('error', rejectWithServiceError)
+    childProcess.once('close', (code) => {
+      cleanupProcess()
+
+      if (code === 0) {
+        resolve()
+        return
+      }
+
+      reject(new YtDlpDownloaderError('SERVICE_UNAVAILABLE'))
+    })
+  }).catch(async (error) => {
+    await rm(directory, { force: true, recursive: true })
+    throw error
+  })
+
+  const fileStats = await stat(filePath).catch(async () => {
+    await rm(directory, { force: true, recursive: true })
+    throw new YtDlpDownloaderError('SERVICE_UNAVAILABLE')
+  })
+
+  if (fileStats.size <= 0) {
+    await rm(directory, { force: true, recursive: true })
+    throw new YtDlpDownloaderError('SERVICE_UNAVAILABLE')
+  }
+
+  const stream = createReadStream(filePath)
+
+  stream.once('error', async () => {
+    await rm(directory, { force: true, recursive: true })
+  })
+
+  return {
+    cleanup: () => rm(directory, { force: true, recursive: true }),
+    filePath,
+    size: fileStats.size,
+    stream,
+  }
+}
+
 export const streamYtDlpFormat = (
   url: string,
   formatId: string,
@@ -210,6 +304,41 @@ export const buildYtDlpFilename = (
 
 const getFormatSize = (format: YtDlpFormat) => format.filesize || format.filesize_approx
 
+const mapRequestedDownloadFormat = (format: YtDlpFormat): DownloadFormat | null => {
+  if (!format.format_id || !format.height) {
+    return null
+  }
+
+  const extension = format.ext || format.video_ext || 'mp4'
+
+  return {
+    extension,
+    id: format.format_id,
+    label: `${format.height}p ${extension.toUpperCase()}`,
+    type: 'video',
+  }
+}
+
+const mapDirectVideoOnlyFormat = (format: YtDlpFormat): DownloadFormat | null => {
+  if (
+    !format.format_id ||
+    !format.height ||
+    format.vcodec === 'none' ||
+    !isDirectHttpFormat(format)
+  ) {
+    return null
+  }
+
+  const extension = format.ext || format.video_ext || 'mp4'
+
+  return {
+    extension,
+    id: format.format_id,
+    label: `${format.height}p ${extension.toUpperCase()}`,
+    type: 'video',
+  }
+}
+
 const mapVideoFormat = (format: YtDlpFormat): DownloadFormat | null => {
   if (
     !format.format_id ||
@@ -268,18 +397,38 @@ const uniqueFormats = (formats: DownloadFormat[]) => {
   })
 }
 
-export const mapYtDlpFormats = (formats: YtDlpFormat[] = []): DownloadFormat[] => {
+export const mapYtDlpFormats = (
+  formats: YtDlpFormat[] = [],
+  requestedDownloads: YtDlpFormat[] = [],
+  options: YtDlpFormatMappingOptions = {},
+): DownloadFormat[] => {
+  const requestedFormats = requestedDownloads
+    .map(mapRequestedDownloadFormat)
+    .filter((format): format is DownloadFormat => Boolean(format))
+
   const videoFormats = formats
     .map(mapVideoFormat)
     .filter((format): format is DownloadFormat => Boolean(format))
     .sort((first, second) => Number.parseInt(second.label) - Number.parseInt(first.label))
+
+  const directVideoFormats = options.includeDirectVideoOnlyFormats
+    ? formats
+        .map(mapDirectVideoOnlyFormat)
+        .filter((format): format is DownloadFormat => Boolean(format))
+        .sort((first, second) => Number.parseInt(second.label) - Number.parseInt(first.label))
+    : []
 
   const audioFormats = formats
     .map(mapAudioFormat)
     .filter((format): format is DownloadFormat => Boolean(format))
     .slice(0, 2)
 
-  return uniqueFormats([...videoFormats, ...audioFormats]).slice(0, 8)
+  return uniqueFormats([
+    ...videoFormats,
+    ...directVideoFormats,
+    ...requestedFormats,
+    ...audioFormats,
+  ]).slice(0, 8)
 }
 
 export const findSourceFormat = (metadata: YtDlpMetadata, formatId: string): YtDlpFormat | null => {
@@ -289,8 +438,13 @@ export const findSourceFormat = (metadata: YtDlpMetadata, formatId: string): YtD
 export const findMappedFormat = (
   metadata: YtDlpMetadata,
   formatId: string,
+  options: YtDlpFormatMappingOptions = {},
 ): DownloadFormat | null => {
-  return mapYtDlpFormats(metadata.formats).find((format) => format.id === formatId) || null
+  return (
+    mapYtDlpFormats(metadata.formats, metadata.requested_downloads, options).find(
+      (format) => format.id === formatId,
+    ) || null
+  )
 }
 
 export const mapYtDlpMetadataToAnalysisResult = (
@@ -298,8 +452,9 @@ export const mapYtDlpMetadataToAnalysisResult = (
   sourceUrl: string,
   platform: DownloadPlatform,
   fallbackName: string,
+  options: YtDlpFormatMappingOptions = {},
 ): DownloadAnalysisResult => {
-  const formats = mapYtDlpFormats(metadata.formats)
+  const formats = mapYtDlpFormats(metadata.formats, metadata.requested_downloads, options)
 
   if (!formats.length) {
     throw new YtDlpDownloaderError('NO_FORMATS_FOUND')

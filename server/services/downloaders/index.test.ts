@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { DownloadPlatform } from '~/shared/types/download'
 import { getDownloaderService } from '.'
 import { tiktokDownloaderService } from './tiktok'
+import { twitterDownloaderService } from './twitter'
 import { UnsupportedDownloaderError } from './unsupported'
 import { youtubeDownloaderService } from './youtube'
 
@@ -14,7 +15,11 @@ describe('downloader service registry', () => {
     expect(getDownloaderService('tiktok')).toBe(tiktokDownloaderService)
   })
 
-  it.each<DownloadPlatform>(['instagram', 'twitter'])(
+  it('uses the real Twitter/X downloader service for Twitter requests', () => {
+    expect(getDownloaderService('twitter')).toBe(twitterDownloaderService)
+  })
+
+  it.each<DownloadPlatform>(['instagram'])(
     'returns an explicit unsupported downloader service for %s requests',
     async (platform) => {
       const service = getDownloaderService(platform)
