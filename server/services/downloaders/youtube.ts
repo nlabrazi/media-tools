@@ -76,14 +76,18 @@ export const startYouTubeDownload = async (
 export const youtubeDownloaderService: DownloaderService = {
   async analyze(request, context) {
     return analyzeYouTubeDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },
 
   async start(request, context) {
     return startYouTubeDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },

@@ -128,7 +128,9 @@ describe('youtube downloader mapping', () => {
           url: 'https://youtu.be/demo',
         },
         {
+          cookiesPath: '/run/secrets/youtube-cookies.txt',
           executablePath: '/usr/local/bin/yt-dlp',
+          jsRuntime: 'node:/usr/local/bin/node',
           timeoutMs: 12_000,
         },
       ),
@@ -142,7 +144,16 @@ describe('youtube downloader mapping', () => {
 
     expect(execFileMock).toHaveBeenCalledWith(
       '/usr/local/bin/yt-dlp',
-      ['--dump-single-json', '--no-playlist', '--no-warnings', 'https://youtu.be/demo'],
+      [
+        '--dump-single-json',
+        '--no-playlist',
+        '--no-warnings',
+        '--js-runtimes',
+        'node:/usr/local/bin/node',
+        '--cookies',
+        '/run/secrets/youtube-cookies.txt',
+        'https://youtu.be/demo',
+      ],
       {
         maxBuffer: 10 * 1024 * 1024,
         timeout: 12_000,
@@ -196,6 +207,25 @@ describe('youtube downloader mapping', () => {
         url: 'https://youtu.be/demo',
       }),
     ).rejects.toThrow(new YouTubeDownloaderError('SERVICE_TIMEOUT'))
+  })
+
+  it('maps YouTube anti-bot failures to a dedicated auth error code', async () => {
+    mockYtDlpError(new Error('Command failed'))
+    execFileMock.mockImplementation((...args: unknown[]) => {
+      const callback = args.at(-1) as ExecFileCallback
+      callback(
+        new Error('Command failed'),
+        '',
+        'ERROR: [youtube] demo: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication.',
+      )
+    })
+
+    await expect(
+      analyzeYouTubeDownload({
+        platform: 'youtube',
+        url: 'https://youtu.be/demo',
+      }),
+    ).rejects.toThrow(new YouTubeDownloaderError('AUTH_REQUIRED'))
   })
 
   it('rejects unsupported format ids before resolving a direct URL', async () => {

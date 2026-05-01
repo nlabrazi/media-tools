@@ -12,6 +12,8 @@ import {
 
 type DownloadRuntimeConfig = {
   download?: {
+    ytDlpCookiesPath?: string
+    ytDlpJsRuntime?: string
     ytDlpPath?: string
     ytDlpTimeoutMs?: number
   }
@@ -26,6 +28,8 @@ export default defineEventHandler(async (event): Promise<DownloadStartResponse> 
     const downloaderService = getDownloaderService(request.platform)
 
     return await downloaderService.start(request, {
+      ytDlpCookiesPath: runtimeConfig.download?.ytDlpCookiesPath,
+      ytDlpJsRuntime: runtimeConfig.download?.ytDlpJsRuntime,
       ytDlpPath: runtimeConfig.download?.ytDlpPath,
       ytDlpTimeoutMs: runtimeConfig.download?.ytDlpTimeoutMs,
     })
@@ -40,10 +44,16 @@ export default defineEventHandler(async (event): Promise<DownloadStartResponse> 
     if (error instanceof YtDlpDownloaderError) {
       throw createError({
         statusCode: error.code === 'FORMAT_NOT_FOUND' ? 400 : 503,
+        message:
+          error.code === 'AUTH_REQUIRED'
+            ? 'YouTube demande une authentification anti-bot. Configurez un fichier cookies yt-dlp côté serveur.'
+            : undefined,
         statusMessage:
-          error.code === 'FORMAT_NOT_FOUND'
-            ? 'Format non supporté pour ce média.'
-            : 'Le service de téléchargement est temporairement indisponible.',
+          error.code === 'AUTH_REQUIRED'
+            ? 'Authentification YouTube requise.'
+            : error.code === 'FORMAT_NOT_FOUND'
+              ? 'Format non supporté pour ce média.'
+              : 'Le service de téléchargement est temporairement indisponible.',
       })
     }
 

@@ -75,14 +75,18 @@ export const startInstagramDownload = async (
 export const instagramDownloaderService: DownloaderService = {
   async analyze(request, context) {
     return analyzeInstagramDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },
 
   async start(request, context) {
     return startInstagramDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },

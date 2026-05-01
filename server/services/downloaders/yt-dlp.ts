@@ -12,6 +12,7 @@ import type {
 } from '~/shared/types/download'
 
 export type YtDlpDownloaderErrorCode =
+  | 'AUTH_REQUIRED'
   | 'FORMAT_NOT_FOUND'
   | 'INVALID_METADATA'
   | 'NO_FORMATS_FOUND'
@@ -25,7 +26,9 @@ export class YtDlpDownloaderError extends Error {
 }
 
 export interface YtDlpDownloaderOptions {
+  cookiesPath?: string
   executablePath?: string
+  jsRuntime?: string
   maxBuffer?: number
   timeoutMs?: number
 }
@@ -66,7 +69,9 @@ interface YtDlpFormatMappingOptions {
 }
 
 const defaultYtDlpDownloaderOptions: Required<YtDlpDownloaderOptions> = {
+  cookiesPath: '',
   executablePath: 'yt-dlp',
+  jsRuntime: `node:${process.execPath}`,
   maxBuffer: 10 * 1024 * 1024,
   timeoutMs: 30_000,
 }
@@ -79,7 +84,9 @@ const normalizeYtDlpDownloaderOptions = (
   options: YtDlpDownloaderOptions = {},
 ): Required<YtDlpDownloaderOptions> => {
   return {
+    cookiesPath: options.cookiesPath || defaultYtDlpDownloaderOptions.cookiesPath,
     executablePath: options.executablePath || defaultYtDlpDownloaderOptions.executablePath,
+    jsRuntime: options.jsRuntime || defaultYtDlpDownloaderOptions.jsRuntime,
     maxBuffer: isPositiveNumber(options.maxBuffer)
       ? options.maxBuffer
       : defaultYtDlpDownloaderOptions.maxBuffer,
@@ -101,6 +108,46 @@ const isTimeoutError = (error: unknown): boolean => {
   return error.code === 'ETIMEDOUT' || error.killed === true || error.signal === 'SIGTERM'
 }
 
+const isAuthenticationRequiredError = (stderr: string) => {
+  return (
+    stderr.includes('Sign in to confirm') ||
+    stderr.includes('--cookies-from-browser') ||
+    stderr.includes('--cookies for the authentication')
+  )
+}
+
+const getYtDlpProcessErrorCode = (
+  error: unknown,
+  stderr = '',
+): Exclude<
+  YtDlpDownloaderErrorCode,
+  'FORMAT_NOT_FOUND' | 'INVALID_METADATA' | 'NO_FORMATS_FOUND'
+> => {
+  if (isTimeoutError(error)) {
+    return 'SERVICE_TIMEOUT'
+  }
+
+  if (isAuthenticationRequiredError(stderr)) {
+    return 'AUTH_REQUIRED'
+  }
+
+  return 'SERVICE_UNAVAILABLE'
+}
+
+const buildYtDlpBaseArgs = (options: Required<YtDlpDownloaderOptions>) => {
+  const args = ['--no-playlist', '--no-warnings']
+
+  if (options.jsRuntime) {
+    args.push('--js-runtimes', options.jsRuntime)
+  }
+
+  if (options.cookiesPath) {
+    args.push('--cookies', options.cookiesPath)
+  }
+
+  return args
+}
+
 export const runYtDlp = async (
   args: string[],
   options: YtDlpDownloaderOptions = {},
@@ -115,13 +162,9 @@ export const runYtDlp = async (
         maxBuffer: downloaderOptions.maxBuffer,
         timeout: downloaderOptions.timeoutMs,
       },
-      (error, stdout) => {
+      (error, stdout, stderr) => {
         if (error) {
-          reject(
-            new YtDlpDownloaderError(
-              isTimeoutError(error) ? 'SERVICE_TIMEOUT' : 'SERVICE_UNAVAILABLE',
-            ),
-          )
+          reject(new YtDlpDownloaderError(getYtDlpProcessErrorCode(error, stderr.toString())))
           return
         }
 
@@ -135,9 +178,10 @@ export const getYtDlpMetadata = async (
   url: string,
   options: YtDlpDownloaderOptions = {},
 ): Promise<YtDlpMetadata> => {
+  const downloaderOptions = normalizeYtDlpDownloaderOptions(options)
   const stdout = await runYtDlp(
-    ['--dump-single-json', '--no-playlist', '--no-warnings', url],
-    options,
+    ['--dump-single-json', ...buildYtDlpBaseArgs(downloaderOptions), url],
+    downloaderOptions,
   )
 
   try {
@@ -152,9 +196,10 @@ export const getYtDlpFormatUrl = async (
   formatId: string,
   options: YtDlpDownloaderOptions = {},
 ): Promise<string> => {
+  const downloaderOptions = normalizeYtDlpDownloaderOptions(options)
   const stdout = await runYtDlp(
-    ['--get-url', '--no-playlist', '--no-warnings', '-f', formatId, url],
-    options,
+    ['--get-url', ...buildYtDlpBaseArgs(downloaderOptions), '-f', formatId, url],
+    downloaderOptions,
   )
   const [downloadUrl] = stdout
     .split('\n')
@@ -178,9 +223,10 @@ export const prepareYtDlpFormatDownload = async (
   const filePath = join(directory, 'download')
 
   await new Promise<void>((resolve, reject) => {
+    const stderrChunks: Buffer[] = []
     const childProcess = spawn(
       downloaderOptions.executablePath,
-      ['--no-playlist', '--no-warnings', '-f', formatId, '-o', filePath, url],
+      [...buildYtDlpBaseArgs(downloaderOptions), '-f', formatId, '-o', filePath, url],
       {
         stdio: ['ignore', 'ignore', 'pipe'],
       },
@@ -195,12 +241,16 @@ export const prepareYtDlpFormatDownload = async (
       clearTimeout(timeout)
     }
 
-    const rejectWithServiceError = () => {
+    const getStderr = () => Buffer.concat(stderrChunks).toString('utf8')
+
+    const rejectWithServiceError = (error?: unknown) => {
       cleanupProcess()
-      reject(new YtDlpDownloaderError('SERVICE_UNAVAILABLE'))
+      reject(new YtDlpDownloaderError(getYtDlpProcessErrorCode(error, getStderr())))
     }
 
-    childProcess.stderr.resume()
+    childProcess.stderr.on('data', (chunk: Buffer) => {
+      stderrChunks.push(chunk)
+    })
 
     childProcess.once('error', rejectWithServiceError)
     childProcess.once('close', (code) => {
@@ -211,7 +261,7 @@ export const prepareYtDlpFormatDownload = async (
         return
       }
 
-      reject(new YtDlpDownloaderError('SERVICE_UNAVAILABLE'))
+      rejectWithServiceError()
     })
   }).catch(async (error) => {
     await rm(directory, { force: true, recursive: true })
@@ -250,7 +300,7 @@ export const streamYtDlpFormat = (
   const downloaderOptions = normalizeYtDlpDownloaderOptions(options)
   const process = spawn(
     downloaderOptions.executablePath,
-    ['--no-playlist', '--no-warnings', '-f', formatId, '-o', '-', url],
+    [...buildYtDlpBaseArgs(downloaderOptions), '-f', formatId, '-o', '-', url],
     {
       stdio: ['ignore', 'pipe', 'pipe'],
     },
