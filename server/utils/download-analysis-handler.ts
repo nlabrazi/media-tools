@@ -15,6 +15,8 @@ import { createFixedWindowRateLimiter } from './rate-limit'
 type DownloadRuntimeConfig = {
   download?: {
     analyzeRateLimit?: unknown
+    ytDlpCookiesPath?: string
+    ytDlpJsRuntime?: string
     ytDlpPath?: string
     ytDlpTimeoutMs?: number
   }
@@ -69,6 +71,8 @@ export const handleDownloadAnalysisRequest = async (
     const request = parseDownloadAnalysisRequest(body)
     const downloaderService = getDownloaderService(request.platform)
     const response = await downloaderService.analyze(request, {
+      ytDlpCookiesPath: runtimeConfig.download?.ytDlpCookiesPath,
+      ytDlpJsRuntime: runtimeConfig.download?.ytDlpJsRuntime,
       ytDlpPath: runtimeConfig.download?.ytDlpPath,
       ytDlpTimeoutMs: runtimeConfig.download?.ytDlpTimeoutMs,
     })
@@ -85,10 +89,16 @@ export const handleDownloadAnalysisRequest = async (
     if (error instanceof YtDlpDownloaderError) {
       throw createError({
         statusCode: error.code === 'NO_FORMATS_FOUND' ? 422 : 503,
+        message:
+          error.code === 'AUTH_REQUIRED'
+            ? 'YouTube demande une authentification anti-bot. Configurez un fichier cookies yt-dlp côté serveur.'
+            : undefined,
         statusMessage:
-          error.code === 'NO_FORMATS_FOUND'
-            ? 'Aucun format téléchargeable trouvé pour ce média.'
-            : "Le service d'analyse est temporairement indisponible.",
+          error.code === 'AUTH_REQUIRED'
+            ? 'Authentification YouTube requise.'
+            : error.code === 'NO_FORMATS_FOUND'
+              ? 'Aucun format téléchargeable trouvé pour ce média.'
+              : "Le service d'analyse est temporairement indisponible.",
       })
     }
 

@@ -69,14 +69,18 @@ export const startTwitterDownload = async (
 export const twitterDownloaderService: DownloaderService = {
   async analyze(request, context) {
     return analyzeTwitterDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },
 
   async start(request, context) {
     return startTwitterDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },

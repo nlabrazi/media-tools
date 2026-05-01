@@ -65,14 +65,18 @@ export const startTikTokDownload = async (
 export const tiktokDownloaderService: DownloaderService = {
   async analyze(request, context) {
     return analyzeTikTokDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },
 
   async start(request, context) {
     return startTikTokDownload(request, {
+      cookiesPath: context?.ytDlpCookiesPath,
       executablePath: context?.ytDlpPath,
+      jsRuntime: context?.ytDlpJsRuntime,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },

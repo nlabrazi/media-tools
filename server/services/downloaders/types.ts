@@ -6,6 +6,8 @@ import type {
 } from '~/shared/types/download'
 
 export interface DownloaderServiceContext {
+  ytDlpCookiesPath?: string
+  ytDlpJsRuntime?: string
   ytDlpPath?: string
   ytDlpTimeoutMs?: number
 }

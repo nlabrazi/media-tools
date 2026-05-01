@@ -131,9 +131,21 @@ The Docker container mounts the project directory into `/app`, so Nuxt reloads t
 
 - The application is built with Nuxt, Vue, TypeScript, and Tailwind CSS.
 - The current server endpoints are available at `POST /api/download/analyze` and `POST /api/download/start`.
-- YouTube, TikTok, and Twitter/X use the real `yt-dlp` backend.
-- YouTube, TikTok, and Twitter/X downloads are streamed through the Nuxt server to avoid opening external media URLs directly.
-- Instagram currently returns an explicit "not available yet" API response.
+- Instagram, YouTube, TikTok, and Twitter/X use the real `yt-dlp` backend.
+- Downloads are streamed through the Nuxt server to avoid opening external media URLs directly.
+
+### 🍪 YouTube production cookies
+
+YouTube may block server-side extraction with an anti-bot challenge. When this happens, `yt-dlp`
+returns an error asking for cookies. Export cookies in Netscape format, mount the file into the
+container, and set:
+
+```bash
+NUXT_DOWNLOAD_YT_DLP_COOKIES_PATH=/run/secrets/youtube-cookies.txt
+NUXT_DOWNLOAD_YT_DLP_JS_RUNTIME=node:/usr/local/bin/node
+```
+
+Never commit cookies to the repository. Rotate the cookie file if the YouTube account session changes.
 
 ### 🧪 Scripts
 

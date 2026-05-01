@@ -24,6 +24,8 @@ export default defineNuxtConfig({
         limit: 10,
         windowMs: 60_000,
       },
+      ytDlpCookiesPath: '',
+      ytDlpJsRuntime: `node:${process.execPath}`,
       ytDlpPath: 'yt-dlp',
       ytDlpTimeoutMs: 30_000,
     },
