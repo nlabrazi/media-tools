@@ -8,6 +8,7 @@ import type {
   DownloadStartRequest,
   DownloadStartResponse,
 } from '~/shared/types/download'
+import type { DownloaderService } from './types'
 
 const execFileAsync = promisify(execFile)
 
@@ -286,4 +287,18 @@ export const startYouTubeDownload = async (
       format,
     },
   }
+}
+
+export const youtubeDownloaderService: DownloaderService = {
+  async analyze(request, context) {
+    return analyzeYouTubeDownload(request, {
+      executablePath: context?.ytDlpPath,
+    })
+  },
+
+  async start(request, context) {
+    return startYouTubeDownload(request, {
+      executablePath: context?.ytDlpPath,
+    })
+  },
 }

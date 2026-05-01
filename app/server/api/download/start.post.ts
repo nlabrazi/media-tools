@@ -1,8 +1,8 @@
 import { createError, readBody } from 'h3'
-import { YouTubeDownloaderError, startYouTubeDownload } from '~/server/services/downloaders/youtube'
+import { getDownloaderService } from '~/server/services/downloaders'
+import { YouTubeDownloaderError } from '~/server/services/downloaders/youtube'
 import {
   DownloadStartError,
-  buildMockDownloadStartResponse,
   downloadStartErrorMessages,
   parseDownloadStartBaseRequest,
 } from '~/server/utils/download-start'
@@ -21,14 +21,11 @@ export default defineEventHandler(async (event): Promise<DownloadStartResponse> 
 
   try {
     const request = parseDownloadStartBaseRequest(body)
+    const downloaderService = getDownloaderService(request.platform)
 
-    if (request.platform === 'youtube') {
-      return await startYouTubeDownload(request, {
-        executablePath: runtimeConfig.download?.ytDlpPath,
-      })
-    }
-
-    return buildMockDownloadStartResponse(body)
+    return await downloaderService.start(request, {
+      ytDlpPath: runtimeConfig.download?.ytDlpPath,
+    })
   } catch (error) {
     if (error instanceof DownloadStartError) {
       throw createError({

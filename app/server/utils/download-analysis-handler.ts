@@ -1,10 +1,10 @@
 import { type H3Event, createError, getRequestIP, readBody, setResponseHeader } from 'h3'
 import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
 import { useRuntimeConfig } from '#imports'
-import { YouTubeDownloaderError, analyzeYouTubeDownload } from '../services/downloaders/youtube'
+import { getDownloaderService } from '../services/downloaders'
+import { YouTubeDownloaderError } from '../services/downloaders/youtube'
 import {
   DownloadAnalysisError,
-  buildDownloadAnalysisResponse,
   downloadAnalysisErrorMessages,
   parseDownloadAnalysisRequest,
 } from './download-analysis'
@@ -65,12 +65,10 @@ export const handleDownloadAnalysisRequest = async (
 
   try {
     const request = parseDownloadAnalysisRequest(body)
-    const response =
-      request.platform === 'youtube'
-        ? await analyzeYouTubeDownload(request, {
-            executablePath: runtimeConfig.download?.ytDlpPath,
-          })
-        : buildDownloadAnalysisResponse(request)
+    const downloaderService = getDownloaderService(request.platform)
+    const response = await downloaderService.analyze(request, {
+      ytDlpPath: runtimeConfig.download?.ytDlpPath,
+    })
 
     // Simulation de temps de traitement
     if (request.platform !== 'youtube') {
