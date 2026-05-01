@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   DownloadAnalysisError,
-  buildDownloadAnalysisResponse,
   downloadAnalysisErrorMessages,
   parseDownloadAnalysisRequest,
 } from './download-analysis'
@@ -43,27 +42,6 @@ describe('download analysis', () => {
         platform: 'instagram',
       }),
     ).toThrow(new DownloadAnalysisError('PLATFORM_HOST_MISMATCH'))
-  })
-
-  it('builds the mocked analysis response', () => {
-    expect(
-      buildDownloadAnalysisResponse({
-        url: 'https://youtu.be/demo',
-        platform: 'youtube',
-      }).data,
-    ).toMatchObject({
-      url: 'https://youtu.be/demo',
-      platform: 'youtube',
-      filename: 'youtube_video_2026.mp4',
-      quality: '1080p',
-      formats: [
-        { id: 'youtube-1080p', label: '1080p', type: 'video' },
-        { id: 'youtube-720p', label: '720p', type: 'video' },
-        { id: 'youtube-480p', label: '480p', type: 'video' },
-        { id: 'youtube-mp3-320', label: 'MP3 320kbps', type: 'audio' },
-        { id: 'youtube-mp3-128', label: 'MP3 128kbps', type: 'audio' },
-      ],
-    })
   })
 
   it('keeps every analysis error mapped to a user-facing message', () => {

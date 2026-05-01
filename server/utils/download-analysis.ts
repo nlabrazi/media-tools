@@ -1,5 +1,4 @@
 import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
-import { buildMockDownloadAnalysisResponse } from '~/shared/utils/download-mock'
 import {
   DownloadValidationError,
   assertValidUrlForPlatform,
@@ -53,10 +52,4 @@ export const parseDownloadAnalysisRequest = (
     platform: body.platform,
     quality: body.quality,
   }
-}
-
-export const buildDownloadAnalysisResponse = (
-  body: Partial<DownloadAnalysisRequest>,
-): DownloadAnalysisResponse => {
-  return buildMockDownloadAnalysisResponse(parseDownloadAnalysisRequest(body))
 }
