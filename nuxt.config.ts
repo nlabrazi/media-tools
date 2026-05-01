@@ -67,6 +67,13 @@ export default defineNuxtConfig({
           href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap',
         },
       ],
+      script: [
+        {
+          src: "https://umami.nabster.dev/script.js",
+          defer: true,
+          "data-website-id": "e553acee-96cd-42fe-bc38-f9dd9d0b0a2b"
+        },
+      ],
     },
   },
 })
