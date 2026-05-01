@@ -151,16 +151,8 @@ describe('youtube downloader mapping', () => {
     )
   })
 
-  it('starts a YouTube download by resolving the selected format URL', async () => {
+  it('starts a YouTube download with a proxied stream URL', async () => {
     mockYtDlpSuccess(JSON.stringify(metadataFixture))
-    execFileMock.mockImplementationOnce((...args: unknown[]) => {
-      const callback = args.at(-1) as ExecFileCallback
-      callback(null, JSON.stringify(metadataFixture), '')
-    })
-    execFileMock.mockImplementationOnce((...args: unknown[]) => {
-      const callback = args.at(-1) as ExecFileCallback
-      callback(null, 'https://video.example/download.mp4\n', '')
-    })
 
     await expect(
       startYouTubeDownload({
@@ -171,11 +163,13 @@ describe('youtube downloader mapping', () => {
     ).resolves.toMatchObject({
       success: true,
       data: {
-        downloadUrl: 'https://video.example/download.mp4',
+        downloadUrl: expect.stringMatching(/^\/api\/download\/stream\/[a-f0-9-]+$/),
         filename: 'Demo_Video.mp4',
         format: { id: '22', label: '720p MP4' },
       },
     })
+
+    expect(execFileMock).toHaveBeenCalledTimes(1)
   })
 
   it('rejects invalid yt-dlp metadata', async () => {

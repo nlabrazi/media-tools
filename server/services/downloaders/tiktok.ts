@@ -1,7 +1,6 @@
 import type {
   DownloadAnalysisRequest,
   DownloadAnalysisResponse,
-  DownloadAnalysisResult,
   DownloadStartRequest,
   DownloadStartResponse,
 } from '~/shared/types/download'
@@ -10,50 +9,40 @@ import type { DownloaderService } from './types'
 import {
   YtDlpDownloaderError,
   type YtDlpDownloaderOptions,
-  type YtDlpMetadata,
   buildYtDlpFilename,
   findMappedFormat,
   getYtDlpMetadata,
-  mapYtDlpFormats,
-  mapYtDlpMetadataToAnalysisResult as mapYtDlpMetadataToPlatformAnalysisResult,
+  mapYtDlpMetadataToAnalysisResult,
 } from './yt-dlp'
 
-export const YouTubeDownloaderError = YtDlpDownloaderError
-export type YouTubeDownloaderOptions = YtDlpDownloaderOptions
-export { mapYtDlpFormats }
+export const TikTokDownloaderError = YtDlpDownloaderError
+export type TikTokDownloaderOptions = YtDlpDownloaderOptions
 
-export const mapYtDlpMetadataToAnalysisResult = (
-  metadata: YtDlpMetadata,
-  sourceUrl: string,
-): DownloadAnalysisResult => {
-  return mapYtDlpMetadataToPlatformAnalysisResult(metadata, sourceUrl, 'youtube', 'youtube_video')
-}
-
-export const analyzeYouTubeDownload = async (
+export const analyzeTikTokDownload = async (
   request: DownloadAnalysisRequest,
-  options: YouTubeDownloaderOptions = {},
+  options: TikTokDownloaderOptions = {},
 ): Promise<DownloadAnalysisResponse> => {
   const metadata = await getYtDlpMetadata(request.url, options)
 
   return {
     success: true,
-    data: mapYtDlpMetadataToAnalysisResult(metadata, request.url),
+    data: mapYtDlpMetadataToAnalysisResult(metadata, request.url, 'tiktok', 'tiktok_video'),
   }
 }
 
-export const startYouTubeDownload = async (
+export const startTikTokDownload = async (
   request: DownloadStartRequest,
-  options: YouTubeDownloaderOptions = {},
+  options: TikTokDownloaderOptions = {},
 ): Promise<DownloadStartResponse> => {
   const metadata = await getYtDlpMetadata(request.url, options)
   const format = findMappedFormat(metadata, request.formatId)
 
   if (!format) {
-    throw new YouTubeDownloaderError('FORMAT_NOT_FOUND')
+    throw new TikTokDownloaderError('FORMAT_NOT_FOUND')
   }
 
   const expiresAt = new Date(Date.now() + 10 * 60_000).toISOString()
-  const filename = buildYtDlpFilename(metadata, format, 'youtube_video')
+  const filename = buildYtDlpFilename(metadata, format, 'tiktok_video')
   const token = createDownloadStreamToken({
     expiresAt,
     filename,
@@ -73,16 +62,16 @@ export const startYouTubeDownload = async (
   }
 }
 
-export const youtubeDownloaderService: DownloaderService = {
+export const tiktokDownloaderService: DownloaderService = {
   async analyze(request, context) {
-    return analyzeYouTubeDownload(request, {
+    return analyzeTikTokDownload(request, {
       executablePath: context?.ytDlpPath,
       timeoutMs: context?.ytDlpTimeoutMs,
     })
   },
 
   async start(request, context) {
-    return startYouTubeDownload(request, {
+    return startTikTokDownload(request, {
       executablePath: context?.ytDlpPath,
       timeoutMs: context?.ytDlpTimeoutMs,
     })

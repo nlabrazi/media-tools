@@ -3,7 +3,7 @@ import type { DownloadStartRequest, DownloadStartResponse } from '~/shared/types
 import { useRuntimeConfig } from '#imports'
 import { getDownloaderService } from '../../services/downloaders'
 import { UnsupportedDownloaderError } from '../../services/downloaders/unsupported'
-import { YouTubeDownloaderError } from '../../services/downloaders/youtube'
+import { YtDlpDownloaderError } from '../../services/downloaders/yt-dlp'
 import {
   DownloadStartError,
   downloadStartErrorMessages,
@@ -37,13 +37,13 @@ export default defineEventHandler(async (event): Promise<DownloadStartResponse> 
       })
     }
 
-    if (error instanceof YouTubeDownloaderError) {
+    if (error instanceof YtDlpDownloaderError) {
       throw createError({
         statusCode: error.code === 'FORMAT_NOT_FOUND' ? 400 : 503,
         statusMessage:
           error.code === 'FORMAT_NOT_FOUND'
             ? 'Format non supporté pour ce média.'
-            : 'Le service de téléchargement YouTube est temporairement indisponible.',
+            : 'Le service de téléchargement est temporairement indisponible.',
       })
     }
 

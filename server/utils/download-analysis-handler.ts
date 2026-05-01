@@ -3,7 +3,7 @@ import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared
 import { useRuntimeConfig } from '#imports'
 import { getDownloaderService } from '../services/downloaders'
 import { UnsupportedDownloaderError } from '../services/downloaders/unsupported'
-import { YouTubeDownloaderError } from '../services/downloaders/youtube'
+import { YtDlpDownloaderError } from '../services/downloaders/yt-dlp'
 import {
   DownloadAnalysisError,
   downloadAnalysisErrorMessages,
@@ -82,13 +82,13 @@ export const handleDownloadAnalysisRequest = async (
       })
     }
 
-    if (error instanceof YouTubeDownloaderError) {
+    if (error instanceof YtDlpDownloaderError) {
       throw createError({
         statusCode: error.code === 'NO_FORMATS_FOUND' ? 422 : 503,
         statusMessage:
           error.code === 'NO_FORMATS_FOUND'
-            ? 'Aucun format téléchargeable trouvé pour cette vidéo YouTube.'
-            : "Le service d'analyse YouTube est temporairement indisponible.",
+            ? 'Aucun format téléchargeable trouvé pour ce média.'
+            : "Le service d'analyse est temporairement indisponible.",
       })
     }
 
