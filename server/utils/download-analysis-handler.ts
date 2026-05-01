@@ -2,6 +2,7 @@ import { type H3Event, createError, getRequestIP, readBody, setResponseHeader } 
 import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
 import { useRuntimeConfig } from '#imports'
 import { getDownloaderService } from '../services/downloaders'
+import { UnsupportedDownloaderError } from '../services/downloaders/unsupported'
 import { YouTubeDownloaderError } from '../services/downloaders/youtube'
 import {
   DownloadAnalysisError,
@@ -72,11 +73,6 @@ export const handleDownloadAnalysisRequest = async (
       ytDlpTimeoutMs: runtimeConfig.download?.ytDlpTimeoutMs,
     })
 
-    // Simulation de temps de traitement
-    if (request.platform !== 'youtube') {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-    }
-
     return response
   } catch (error) {
     if (error instanceof DownloadAnalysisError) {
@@ -93,6 +89,14 @@ export const handleDownloadAnalysisRequest = async (
           error.code === 'NO_FORMATS_FOUND'
             ? 'Aucun format téléchargeable trouvé pour cette vidéo YouTube.'
             : "Le service d'analyse YouTube est temporairement indisponible.",
+      })
+    }
+
+    if (error instanceof UnsupportedDownloaderError) {
+      throw createError({
+        message: `Le téléchargement ${error.platform} n'est pas encore disponible.`,
+        statusCode: 501,
+        statusMessage: 'Platform not implemented',
       })
     }
 

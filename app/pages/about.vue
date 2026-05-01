@@ -12,8 +12,9 @@
         rendre le contenu accessible à tous, sans limite et sans inscription.
       </p>
       <p>
-        Actuellement en <strong>version 1.0</strong>, le backend est en cours de développement. Les
-        fonctionnalités de téléchargement seront disponibles très prochainement.
+        Actuellement en <strong>version 1.0</strong>, le téléchargement YouTube est branché côté
+        backend. Les autres plateformes sont préparées dans l'interface et seront activées
+        progressivement.
       </p>
       <p class="text-cyber-blue">Restez connectés !</p>
     </div>

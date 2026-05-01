@@ -1,6 +1,6 @@
 import type { DownloadPlatform } from '~/shared/types/download'
-import { mockDownloaderService } from './mock'
 import type { DownloaderService } from './types'
+import { createUnsupportedDownloaderService } from './unsupported'
 import { youtubeDownloaderService } from './youtube'
 
 const downloaderServices: Partial<Record<DownloadPlatform, DownloaderService>> = {
@@ -8,7 +8,7 @@ const downloaderServices: Partial<Record<DownloadPlatform, DownloaderService>> =
 }
 
 export const getDownloaderService = (platform: DownloadPlatform): DownloaderService => {
-  return downloaderServices[platform] || mockDownloaderService
+  return downloaderServices[platform] || createUnsupportedDownloaderService(platform)
 }
 
 export type { DownloaderService, DownloaderServiceContext } from './types'

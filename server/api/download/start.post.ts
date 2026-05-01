@@ -2,6 +2,7 @@ import { createError, readBody } from 'h3'
 import type { DownloadStartRequest, DownloadStartResponse } from '~/shared/types/download'
 import { useRuntimeConfig } from '#imports'
 import { getDownloaderService } from '../../services/downloaders'
+import { UnsupportedDownloaderError } from '../../services/downloaders/unsupported'
 import { YouTubeDownloaderError } from '../../services/downloaders/youtube'
 import {
   DownloadStartError,
@@ -43,6 +44,14 @@ export default defineEventHandler(async (event): Promise<DownloadStartResponse> 
           error.code === 'FORMAT_NOT_FOUND'
             ? 'Format non supporté pour ce média.'
             : 'Le service de téléchargement YouTube est temporairement indisponible.',
+      })
+    }
+
+    if (error instanceof UnsupportedDownloaderError) {
+      throw createError({
+        message: `Le téléchargement ${error.platform} n'est pas encore disponible.`,
+        statusCode: 501,
+        statusMessage: 'Platform not implemented',
       })
     }
 

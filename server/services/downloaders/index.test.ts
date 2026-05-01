@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { DownloadPlatform } from '~/shared/types/download'
 import { getDownloaderService } from '.'
-import { mockDownloaderService } from './mock'
+import { UnsupportedDownloaderError } from './unsupported'
 import { youtubeDownloaderService } from './youtube'
 
 describe('downloader service registry', () => {
@@ -10,37 +10,26 @@ describe('downloader service registry', () => {
   })
 
   it.each<DownloadPlatform>(['instagram', 'tiktok', 'twitter'])(
-    'falls back to the mock downloader service for %s requests',
-    (platform) => {
-      expect(getDownloaderService(platform)).toBe(mockDownloaderService)
+    'returns an explicit unsupported downloader service for %s requests',
+    async (platform) => {
+      const service = getDownloaderService(platform)
+
+      await expect(
+        service.analyze({
+          url: `https://www.${platform}.com/demo`,
+          platform,
+        }),
+      ).rejects.toThrow(new UnsupportedDownloaderError(platform))
     },
   )
 
-  it('keeps the fallback service compatible with the downloader contract', async () => {
-    const analysis = await getDownloaderService('instagram').analyze({
-      url: 'https://www.instagram.com/p/demo',
-      platform: 'instagram',
-    })
-
-    expect(analysis).toMatchObject({
-      success: true,
-      data: {
-        platform: 'instagram',
+  it('rejects unsupported start requests with the same platform error', async () => {
+    await expect(
+      getDownloaderService('instagram').start({
         url: 'https://www.instagram.com/p/demo',
-      },
-    })
-
-    const start = await getDownloaderService('instagram').start({
-      url: 'https://www.instagram.com/p/demo',
-      platform: 'instagram',
-      formatId: analysis.data.formats[0]?.id || '',
-    })
-
-    expect(start).toMatchObject({
-      success: true,
-      data: {
-        format: analysis.data.formats[0],
-      },
-    })
+        platform: 'instagram',
+        formatId: 'instagram-photo-1080',
+      }),
+    ).rejects.toThrow(new UnsupportedDownloaderError('instagram'))
   })
 })

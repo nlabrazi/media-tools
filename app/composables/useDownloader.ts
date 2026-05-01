@@ -1,6 +1,6 @@
 /*
   Logique de téléchargement partagée.
-  Pour la V1 : appelle l'API Nuxt qui retourne encore un mock serveur.
+  Appelle l'API Nuxt : analyse d'abord le média, puis prépare le téléchargement.
 */
 import type { Tool } from '~/data/tools'
 import type {
