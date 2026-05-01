@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { useNotification } from './composables/useNotification';
+import { useNotification } from './composables/useNotification'
 
 const { notifications } = useNotification()
 </script>

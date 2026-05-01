@@ -27,11 +27,15 @@
 
         <slot name="quality-selector" />
 
-        <button class="btn-cyber btn-cyber-primary w-full mt-4 text-lg">
-          ⬇ Télécharger {{ result.filename }}
+        <button
+          class="btn-cyber btn-cyber-primary w-full mt-4 text-lg"
+          :disabled="isDownloading"
+          @click="$emit('download')"
+        >
+          {{ isDownloading ? 'Préparation...' : `⬇ Télécharger ${result.filename}` }}
         </button>
         <p class="text-xs text-gray-500 mt-2 text-center">
-          (Backend à connecter — pour l'instant, bouton simulé)
+          Téléchargement simulé en attendant le backend d'extraction.
         </p>
       </div>
     </div>
@@ -42,6 +46,11 @@
 import type { DownloadResult } from '../../app/composables/useDownloader'
 
 defineProps<{
+  isDownloading: boolean
   result: DownloadResult
+}>()
+
+defineEmits<{
+  download: []
 }>()
 </script>

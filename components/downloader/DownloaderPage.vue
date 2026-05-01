@@ -23,11 +23,14 @@
     <DownloaderForm v-model:url="url" :tool="tool" :is-loading="isLoading" :error="error" @fetch="fetchInfo" />
 
     <div v-if="result" class="mt-8">
-      <DownloaderPreview :result="result">
+      <DownloaderPreview :is-downloading="isDownloading" :result="result" @download="startDownload">
         <template #quality-selector>
-          <QualitySelector v-if="tool.id === 'youtube'"
-            :qualities="['1080p', '720p', '480p', 'MP3 320kbps', 'MP3 128kbps']" :selected="selectedQuality"
-            @update:selected="selectedQuality = $event" />
+          <QualitySelector
+            v-if="result.formats.length > 1"
+            :formats="result.formats"
+            :selected="selectedQuality"
+            @update:selected="selectFormat"
+          />
         </template>
       </DownloaderPreview>
     </div>
@@ -43,5 +46,15 @@ const props = defineProps<{
 
 const toolRef = computed(() => props.tool)
 
-const { url, isLoading, result, error, selectedQuality, fetchInfo } = useDownloader(toolRef)
+const {
+  url,
+  isLoading,
+  isDownloading,
+  result,
+  error,
+  selectedQuality,
+  selectFormat,
+  startDownload,
+  fetchInfo,
+} = useDownloader(toolRef)
 </script>

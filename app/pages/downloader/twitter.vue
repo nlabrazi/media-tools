@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { tools } from '~/data/tools'
+import { findToolById } from '~/data/tools'
 
-const tool = tools.find((t) => t.id === 'twitter')!
+const tool = findToolById('twitter')
 </script>

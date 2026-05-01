@@ -11,31 +11,31 @@ export const features: Feature[] = [
   {
     icon: '⚡',
     title: 'Ultra Rapide',
-    description: 'Téléchargement optimisé avec mise en cache intelligente.'
+    description: 'Téléchargement optimisé avec mise en cache intelligente.',
   },
   {
     icon: '🔒',
     title: 'Sécurisé',
-    description: 'Aucune donnée stockée. Vos liens restent privés.'
+    description: 'Aucune donnée stockée. Vos liens restent privés.',
   },
   {
     icon: '📱',
     title: 'Multi-plateforme',
-    description: 'Instagram, TikTok, YouTube, Twitter et bientôt plus.'
+    description: 'Instagram, TikTok, YouTube, Twitter et bientôt plus.',
   },
   {
     icon: '🎨',
     title: 'Sans watermark',
-    description: 'Téléchargez les vidéos TikTok sans filigrane.'
+    description: 'Téléchargez les vidéos TikTok sans filigrane.',
   },
   {
     icon: '🎵',
     title: 'Extraction audio',
-    description: 'Convertissez les vidéos en MP3 de haute qualité.'
+    description: 'Convertissez les vidéos en MP3 de haute qualité.',
   },
   {
     icon: '💯',
     title: '100% Gratuit',
-    description: 'Aucune inscription, aucun abonnement. Vraiment gratuit.'
-  }
+    description: 'Aucune inscription, aucun abonnement. Vraiment gratuit.',
+  },
 ]

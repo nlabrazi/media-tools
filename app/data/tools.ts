@@ -21,7 +21,7 @@ export const tools: Tool[] = [
     description: 'Photos, vidéos, stories, reels et IGTV.',
     route: '/downloader/instagram',
     supportedFormats: ['Photo', 'Video', 'Reel', 'Story', 'Carousel'],
-    placeholder: 'https://www.instagram.com/p/... ou https://www.instagram.com/reel/...'
+    placeholder: 'https://www.instagram.com/p/... ou https://www.instagram.com/reel/...',
   },
   {
     id: 'tiktok',
@@ -31,7 +31,7 @@ export const tools: Tool[] = [
     description: 'Vidéos sans watermark en HD.',
     route: '/downloader/tiktok',
     supportedFormats: ['Video (sans watermark)', 'Video (avec watermark)', 'Audio (MP3)'],
-    placeholder: 'https://www.tiktok.com/@user/video/... ou https://vm.tiktok.com/...'
+    placeholder: 'https://www.tiktok.com/@user/video/... ou https://vm.tiktok.com/...',
   },
   {
     id: 'youtube',
@@ -41,7 +41,7 @@ export const tools: Tool[] = [
     description: 'Vidéos en MP4, audio en MP3.',
     route: '/downloader/youtube',
     supportedFormats: ['MP4 1080p', 'MP4 720p', 'MP4 480p', 'MP3 320kbps', 'MP3 128kbps'],
-    placeholder: 'https://www.youtube.com/watch?v=... ou https://youtu.be/...'
+    placeholder: 'https://www.youtube.com/watch?v=... ou https://youtu.be/...',
   },
   {
     id: 'twitter',
@@ -51,6 +51,16 @@ export const tools: Tool[] = [
     description: 'Vidéos et GIFs depuis les tweets.',
     route: '/downloader/twitter',
     supportedFormats: ['Video MP4', 'GIF'],
-    placeholder: 'https://twitter.com/user/status/... ou https://x.com/user/status/...'
-  }
+    placeholder: 'https://twitter.com/user/status/... ou https://x.com/user/status/...',
+  },
 ]
+
+export const findToolById = (id: Tool['id']): Tool => {
+  const tool = tools.find((item) => item.id === id)
+
+  if (!tool) {
+    throw new Error(`Tool "${id}" is not configured.`)
+  }
+
+  return tool
+}

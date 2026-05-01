@@ -30,6 +30,6 @@ export const useNotification = () => {
   return {
     notifications,
     addNotification,
-    removeNotification
+    removeNotification,
   }
 }
