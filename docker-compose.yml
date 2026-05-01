@@ -1,14 +1,25 @@
-version: '3.8'
-
 services:
   media-tools:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: media-tools
     image: media-tools
     ports:
       - '3000:3000'
+      - '24678:24678'
     environment:
-      - NODE_ENV=production
+      CHOKIDAR_USEPOLLING: 'true'
+      NODE_ENV: development
+      NUXT_HOST: 0.0.0.0
+      NUXT_PORT: 3000
+      WATCHPACK_POLLING: 'true'
+    volumes:
+      - .:/app
+      - media-tools-node-modules:/app/node_modules
+      - media-tools-nuxt:/app/.nuxt
     restart: unless-stopped
+
+volumes:
+  media-tools-node-modules:
+  media-tools-nuxt:

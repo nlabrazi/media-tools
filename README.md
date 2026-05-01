@@ -110,9 +110,14 @@ npm run dev
 ### 🐳 Docker
 
 ```bash
-# Build and start the application
+# First start, or after dependency/Dockerfile changes
 docker compose up --build
+
+# Regular start with hot reload
+docker compose up
 ```
+
+The Docker container mounts the project directory into `/app`, so Nuxt reloads the browser when local files change. Rebuild the image only after changes to `package.json`, `package-lock.json`, or `Dockerfile.dev`.
 
 ### ▶️ Usage
 

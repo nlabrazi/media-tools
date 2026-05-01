@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache ca-certificates ffmpeg py3-pip python3 \
+  && python3 -m venv /opt/yt-dlp \
+  && /opt/yt-dlp/bin/pip install --no-cache-dir yt-dlp \
+  && ln -s /opt/yt-dlp/bin/yt-dlp /usr/local/bin/yt-dlp
+
+COPY package*.json ./
+RUN npm ci
+
+ENV CHOKIDAR_USEPOLLING=true
+ENV NODE_ENV=development
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=3000
+ENV WATCHPACK_POLLING=true
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
