@@ -27,15 +27,12 @@
 
         <slot name="quality-selector" />
 
-        <button
-          class="btn-cyber btn-cyber-primary w-full mt-4 text-lg"
-          :disabled="isDownloading"
-          @click="$emit('download')"
-        >
-          {{ isDownloading ? 'Préparation...' : `⬇ Télécharger ${result.filename}` }}
+        <button class="btn-cyber btn-cyber-primary w-full mt-4 text-lg" :disabled="isDownloading"
+          @click="$emit('download')">
+          {{ isDownloading ? 'Préparation...' : `⬇ Télécharger` }}
         </button>
         <p class="text-xs text-gray-500 mt-2 text-center">
-          Téléchargement simulé en attendant le backend d'extraction.
+          Le lien est généré par le service d'extraction et peut expirer.
         </p>
       </div>
     </div>

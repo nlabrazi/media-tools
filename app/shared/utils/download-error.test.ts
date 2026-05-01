@@ -22,6 +22,17 @@ describe('download error message', () => {
     ).toBe('Plateforme non supportée.')
   })
 
+  it('prefers the response body message over the HTTP status reason phrase', () => {
+    expect(
+      getDownloadErrorMessage({
+        data: {
+          message: "Le téléchargement instagram n'est pas encore disponible.",
+          statusMessage: 'Platform not implemented',
+        },
+      }),
+    ).toBe("Le téléchargement instagram n'est pas encore disponible.")
+  })
+
   it('uses a top-level status message when no data payload exists', () => {
     expect(
       getDownloadErrorMessage({

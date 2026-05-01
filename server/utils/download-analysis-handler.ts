@@ -2,7 +2,8 @@ import { type H3Event, createError, getRequestIP, readBody, setResponseHeader } 
 import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
 import { useRuntimeConfig } from '#imports'
 import { getDownloaderService } from '../services/downloaders'
-import { YouTubeDownloaderError } from '../services/downloaders/youtube'
+import { UnsupportedDownloaderError } from '../services/downloaders/unsupported'
+import { YtDlpDownloaderError } from '../services/downloaders/yt-dlp'
 import {
   DownloadAnalysisError,
   downloadAnalysisErrorMessages,
@@ -15,6 +16,7 @@ type DownloadRuntimeConfig = {
   download?: {
     analyzeRateLimit?: unknown
     ytDlpPath?: string
+    ytDlpTimeoutMs?: number
   }
 }
 
@@ -68,12 +70,8 @@ export const handleDownloadAnalysisRequest = async (
     const downloaderService = getDownloaderService(request.platform)
     const response = await downloaderService.analyze(request, {
       ytDlpPath: runtimeConfig.download?.ytDlpPath,
+      ytDlpTimeoutMs: runtimeConfig.download?.ytDlpTimeoutMs,
     })
-
-    // Simulation de temps de traitement
-    if (request.platform !== 'youtube') {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-    }
 
     return response
   } catch (error) {
@@ -84,10 +82,21 @@ export const handleDownloadAnalysisRequest = async (
       })
     }
 
-    if (error instanceof YouTubeDownloaderError) {
+    if (error instanceof YtDlpDownloaderError) {
       throw createError({
-        statusCode: 503,
-        statusMessage: "Le service d'analyse YouTube est temporairement indisponible.",
+        statusCode: error.code === 'NO_FORMATS_FOUND' ? 422 : 503,
+        statusMessage:
+          error.code === 'NO_FORMATS_FOUND'
+            ? 'Aucun format téléchargeable trouvé pour ce média.'
+            : "Le service d'analyse est temporairement indisponible.",
+      })
+    }
+
+    if (error instanceof UnsupportedDownloaderError) {
+      throw createError({
+        message: `Le téléchargement ${error.platform} n'est pas encore disponible.`,
+        statusCode: 501,
+        statusMessage: 'Platform not implemented',
       })
     }
 

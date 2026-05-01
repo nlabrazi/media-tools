@@ -22,8 +22,8 @@ export const getDownloadErrorMessage = (
   }
 
   const dataMessage =
-    getStringProperty(error.data, 'statusMessage') ||
     getStringProperty(error.data, 'message') ||
+    getStringProperty(error.data, 'statusMessage') ||
     getStringProperty(error, 'statusMessage')
 
   if (dataMessage) {

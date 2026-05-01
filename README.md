@@ -55,7 +55,7 @@
 
 Media-Tools is a simple and fast web application designed to download social media content in one click. Paste a public media link, choose your options, and get your content instantly.
 
-- 📥 Social Media Downloader: Download content from Instagram, TikTok, YouTube, and Twitter/X.
+- 📥 Social Media Downloader: Download YouTube, TikTok, and Twitter/X content, with Instagram prepared for upcoming backend support.
 - ⚡ Fast User Experience: No account required, no complex setup, just paste a link and download.
 - 🎛️ Quality Selection: Prepare downloads with selectable output quality when available.
 - 🧩 Modern Frontend: Built with Nuxt, Vue, TypeScript, and Tailwind CSS.
@@ -65,11 +65,11 @@ Media-Tools is a simple and fast web application designed to download social med
 
 ## 🚀 Planned Features
 
-- 🔗 Multi-platform Support: Improve support for Instagram, TikTok, YouTube, and Twitter/X links.
+- 🔗 Multi-platform Support: Add real backend support for Instagram links.
 - 🎞️ Video Download: Enable reliable video download from supported platforms.
 - 🎧 Audio Extraction: Add audio-only download options when relevant.
 - 🎛️ Quality Options: Allow users to choose available quality formats.
-- 🧪 Real Backend Integration: Replace the current mock download endpoint with a real download service.
+- 🧪 Real Backend Integration: Extend the current `yt-dlp` backend to Instagram if reliable support is possible.
 - 📱 Mobile Compatibility: Optimize the interface for mobile-first usage.
 - 🛡️ Safer Input Handling: Validate URLs and handle unsupported platforms clearly.
 
@@ -130,9 +130,10 @@ The Docker container mounts the project directory into `/app`, so Nuxt reloads t
 ### 🔧 Local Notes
 
 - The application is built with Nuxt, Vue, TypeScript, and Tailwind CSS.
-- The current server endpoint is available at `POST /api/download`.
-- The download endpoint currently returns a mocked response.
-- Real media extraction logic should be implemented before production usage.
+- The current server endpoints are available at `POST /api/download/analyze` and `POST /api/download/start`.
+- YouTube, TikTok, and Twitter/X use the real `yt-dlp` backend.
+- YouTube, TikTok, and Twitter/X downloads are streamed through the Nuxt server to avoid opening external media URLs directly.
+- Instagram currently returns an explicit "not available yet" API response.
 
 ### 🧪 Scripts
 
