@@ -4,11 +4,19 @@ import {
   YtDlpDownloaderError,
   prepareYtDlpFormatDownload,
 } from '../../../services/downloaders/yt-dlp'
+import { logApiError } from '../../../utils/api-logger'
 
 export default defineEventHandler(async (event) => {
   const payload = getDownloadStreamToken(getRouterParam(event, 'token'))
 
   if (!payload) {
+    logApiError({
+      event,
+      level: 'warn',
+      statusCode: 404,
+      message: 'Download stream token not found',
+    })
+
     throw createError({
       statusCode: 404,
       statusMessage: 'Download link expired',
@@ -40,14 +48,30 @@ export default defineEventHandler(async (event) => {
     return sendStream(event, download.stream)
   } catch (error) {
     if (error instanceof YtDlpDownloaderError) {
+      const statusCode = error.code === 'SERVICE_TIMEOUT' ? 504 : 503
+
+      logApiError({
+        error,
+        event,
+        statusCode,
+        message: 'Download stream failed',
+      })
+
       throw createError({
-        statusCode: error.code === 'SERVICE_TIMEOUT' ? 504 : 503,
+        statusCode,
         statusMessage:
           error.code === 'SERVICE_TIMEOUT'
             ? 'Download service timed out'
             : 'Download service unavailable',
       })
     }
+
+    logApiError({
+      error,
+      event,
+      statusCode: 500,
+      message: 'Unexpected download stream error',
+    })
 
     throw error
   }

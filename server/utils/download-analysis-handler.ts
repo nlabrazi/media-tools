@@ -4,6 +4,7 @@ import { useRuntimeConfig } from '#imports'
 import { getDownloaderService } from '../services/downloaders'
 import { UnsupportedDownloaderError } from '../services/downloaders/unsupported'
 import { YtDlpDownloaderError } from '../services/downloaders/yt-dlp'
+import { logApiError } from './api-logger'
 import {
   DownloadAnalysisError,
   downloadAnalysisErrorMessages,
@@ -59,6 +60,13 @@ export const handleDownloadAnalysisRequest = async (
   setResponseHeader(event, 'X-RateLimit-Reset', Math.ceil(rateLimit.resetAt / 1000).toString())
 
   if (!rateLimit.allowed) {
+    logApiError({
+      event,
+      level: 'warn',
+      statusCode: 429,
+      message: 'Download analysis rate limit exceeded',
+    })
+
     throw createError({
       statusCode: 429,
       statusMessage: 'Trop de tentatives. Réessayez dans quelques instants.',
@@ -80,6 +88,14 @@ export const handleDownloadAnalysisRequest = async (
     return response
   } catch (error) {
     if (error instanceof DownloadAnalysisError) {
+      logApiError({
+        error,
+        event,
+        level: 'warn',
+        statusCode: 400,
+        message: 'Invalid download analysis request',
+      })
+
       throw createError({
         statusCode: 400,
         statusMessage: downloadAnalysisErrorMessages[error.code],
@@ -87,8 +103,18 @@ export const handleDownloadAnalysisRequest = async (
     }
 
     if (error instanceof YtDlpDownloaderError) {
+      const statusCode = error.code === 'NO_FORMATS_FOUND' ? 422 : 503
+
+      logApiError({
+        error,
+        event,
+        level: statusCode >= 500 ? 'error' : 'warn',
+        statusCode,
+        message: 'Download analysis failed',
+      })
+
       throw createError({
-        statusCode: error.code === 'NO_FORMATS_FOUND' ? 422 : 503,
+        statusCode,
         message:
           error.code === 'AUTH_REQUIRED'
             ? 'YouTube demande une authentification anti-bot. Configurez un fichier cookies yt-dlp côté serveur.'
@@ -103,12 +129,27 @@ export const handleDownloadAnalysisRequest = async (
     }
 
     if (error instanceof UnsupportedDownloaderError) {
+      logApiError({
+        error,
+        event,
+        level: 'warn',
+        statusCode: 501,
+        message: 'Unsupported download analysis platform',
+      })
+
       throw createError({
         message: `Le téléchargement ${error.platform} n'est pas encore disponible.`,
         statusCode: 501,
         statusMessage: 'Platform not implemented',
       })
     }
+
+    logApiError({
+      error,
+      event,
+      statusCode: 500,
+      message: 'Unexpected download analysis error',
+    })
 
     throw error
   }
