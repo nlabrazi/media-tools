@@ -7,6 +7,7 @@ import type {
 
 export interface DownloaderServiceContext {
   ytDlpPath?: string
+  ytDlpTimeoutMs?: number
 }
 
 export interface DownloaderService {

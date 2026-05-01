@@ -7,6 +7,17 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
+  nitro: {
+    devServer: {
+      watch: ['server'],
+    },
+    watchOptions: {
+      ignoreInitial: true,
+      interval: 500,
+      usePolling: process.env.CHOKIDAR_USEPOLLING === 'true',
+    },
+  },
+
   runtimeConfig: {
     download: {
       analyzeRateLimit: {
@@ -14,6 +25,7 @@ export default defineNuxtConfig({
         windowMs: 60_000,
       },
       ytDlpPath: 'yt-dlp',
+      ytDlpTimeoutMs: 30_000,
     },
   },
 

@@ -1,17 +1,18 @@
 import { createError, readBody } from 'h3'
-import { getDownloaderService } from '~/server/services/downloaders'
-import { YouTubeDownloaderError } from '~/server/services/downloaders/youtube'
+import type { DownloadStartRequest, DownloadStartResponse } from '~/shared/types/download'
+import { useRuntimeConfig } from '#imports'
+import { getDownloaderService } from '../../services/downloaders'
+import { YouTubeDownloaderError } from '../../services/downloaders/youtube'
 import {
   DownloadStartError,
   downloadStartErrorMessages,
   parseDownloadStartBaseRequest,
-} from '~/server/utils/download-start'
-import type { DownloadStartRequest, DownloadStartResponse } from '~/shared/types/download'
-import { useRuntimeConfig } from '#imports'
+} from '../../utils/download-start'
 
 type DownloadRuntimeConfig = {
   download?: {
     ytDlpPath?: string
+    ytDlpTimeoutMs?: number
   }
 }
 
@@ -25,6 +26,7 @@ export default defineEventHandler(async (event): Promise<DownloadStartResponse> 
 
     return await downloaderService.start(request, {
       ytDlpPath: runtimeConfig.download?.ytDlpPath,
+      ytDlpTimeoutMs: runtimeConfig.download?.ytDlpTimeoutMs,
     })
   } catch (error) {
     if (error instanceof DownloadStartError) {

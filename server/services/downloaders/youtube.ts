@@ -1,5 +1,4 @@
 import { execFile } from 'node:child_process'
-import { promisify } from 'node:util'
 import type {
   DownloadAnalysisRequest,
   DownloadAnalysisResponse,
@@ -10,9 +9,12 @@ import type {
 } from '~/shared/types/download'
 import type { DownloaderService } from './types'
 
-const execFileAsync = promisify(execFile)
-
-type YouTubeDownloaderErrorCode = 'FORMAT_NOT_FOUND' | 'NO_FORMATS_FOUND' | 'SERVICE_UNAVAILABLE'
+type YouTubeDownloaderErrorCode =
+  | 'FORMAT_NOT_FOUND'
+  | 'INVALID_METADATA'
+  | 'NO_FORMATS_FOUND'
+  | 'SERVICE_TIMEOUT'
+  | 'SERVICE_UNAVAILABLE'
 
 export class YouTubeDownloaderError extends Error {
   constructor(public readonly code: YouTubeDownloaderErrorCode) {
@@ -22,6 +24,7 @@ export class YouTubeDownloaderError extends Error {
 
 export interface YouTubeDownloaderOptions {
   executablePath?: string
+  maxBuffer?: number
   timeoutMs?: number
 }
 
@@ -47,24 +50,68 @@ interface YtDlpMetadata {
 
 const defaultYouTubeDownloaderOptions: Required<YouTubeDownloaderOptions> = {
   executablePath: 'yt-dlp',
+  maxBuffer: 10 * 1024 * 1024,
   timeoutMs: 30_000,
+}
+
+const isPositiveNumber = (value: unknown): value is number => {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+}
+
+const normalizeYouTubeDownloaderOptions = (
+  options: YouTubeDownloaderOptions = {},
+): Required<YouTubeDownloaderOptions> => {
+  return {
+    executablePath: options.executablePath || defaultYouTubeDownloaderOptions.executablePath,
+    maxBuffer: isPositiveNumber(options.maxBuffer)
+      ? options.maxBuffer
+      : defaultYouTubeDownloaderOptions.maxBuffer,
+    timeoutMs: isPositiveNumber(options.timeoutMs)
+      ? options.timeoutMs
+      : defaultYouTubeDownloaderOptions.timeoutMs,
+  }
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null
+}
+
+const isTimeoutError = (error: unknown): boolean => {
+  if (!isRecord(error)) {
+    return false
+  }
+
+  return error.code === 'ETIMEDOUT' || error.killed === true || error.signal === 'SIGTERM'
 }
 
 const runYtDlp = async (
   args: string[],
   options: YouTubeDownloaderOptions = {},
 ): Promise<string> => {
-  const downloaderOptions = { ...defaultYouTubeDownloaderOptions, ...options }
+  const downloaderOptions = normalizeYouTubeDownloaderOptions(options)
 
-  try {
-    const { stdout } = await execFileAsync(downloaderOptions.executablePath, args, {
-      timeout: downloaderOptions.timeoutMs,
-    })
+  return new Promise((resolve, reject) => {
+    execFile(
+      downloaderOptions.executablePath,
+      args,
+      {
+        maxBuffer: downloaderOptions.maxBuffer,
+        timeout: downloaderOptions.timeoutMs,
+      },
+      (error, stdout) => {
+        if (error) {
+          reject(
+            new YouTubeDownloaderError(
+              isTimeoutError(error) ? 'SERVICE_TIMEOUT' : 'SERVICE_UNAVAILABLE',
+            ),
+          )
+          return
+        }
 
-    return stdout
-  } catch {
-    throw new YouTubeDownloaderError('SERVICE_UNAVAILABLE')
-  }
+        resolve(stdout.toString())
+      },
+    )
+  })
 }
 
 const getYtDlpMetadata = async (
@@ -79,7 +126,7 @@ const getYtDlpMetadata = async (
   try {
     return JSON.parse(stdout) as YtDlpMetadata
   } catch {
-    throw new YouTubeDownloaderError('SERVICE_UNAVAILABLE')
+    throw new YouTubeDownloaderError('INVALID_METADATA')
   }
 }
 
@@ -293,12 +340,14 @@ export const youtubeDownloaderService: DownloaderService = {
   async analyze(request, context) {
     return analyzeYouTubeDownload(request, {
       executablePath: context?.ytDlpPath,
+      timeoutMs: context?.ytDlpTimeoutMs,
     })
   },
 
   async start(request, context) {
     return startYouTubeDownload(request, {
       executablePath: context?.ytDlpPath,
+      timeoutMs: context?.ytDlpTimeoutMs,
     })
   },
 }
