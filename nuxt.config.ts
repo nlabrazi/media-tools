@@ -69,9 +69,9 @@ export default defineNuxtConfig({
       ],
       script: [
         {
-          src: "https://umami.nabster.dev/script.js",
+          src: 'https://umami.nabster.dev/script.js',
           defer: true,
-          "data-website-id": "e553acee-96cd-42fe-bc38-f9dd9d0b0a2b"
+          'data-website-id': 'e553acee-96cd-42fe-bc38-f9dd9d0b0a2b',
         },
       ],
     },
