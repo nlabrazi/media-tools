@@ -27,7 +27,7 @@
     "@nlabrazi/config-vitest": "^0.1.0",
     "@nlabrazi/tsconfig": "^0.1.0",
     "@nuxtjs/tailwindcss": "^6.13.2",
-    "@types/node": "^20.19.39",
+    "@types/node": "^26.0.0",
     "vue-tsc": "^3.2.7"
   }
 }
