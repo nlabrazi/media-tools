@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { TwitterDownloaderError, analyzeTwitterDownload, startTwitterDownload } from './twitter'
+import { analyzeTwitterDownload, startTwitterDownload, TwitterDownloaderError } from './twitter'
 
 const execFileMock = vi.hoisted(() => vi.fn())
 

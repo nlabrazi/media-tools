@@ -1,6 +1,6 @@
 import { execFile, spawn } from 'node:child_process'
-import { createReadStream } from 'node:fs'
 import type { ReadStream } from 'node:fs'
+import { createReadStream } from 'node:fs'
 import { mkdtemp, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

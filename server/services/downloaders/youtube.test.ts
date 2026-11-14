@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  YouTubeDownloaderError,
   analyzeYouTubeDownload,
   mapYtDlpFormats,
   mapYtDlpMetadataToAnalysisResult,
   startYouTubeDownload,
+  YouTubeDownloaderError,
 } from './youtube'
 
 const execFileMock = vi.hoisted(() => vi.fn())

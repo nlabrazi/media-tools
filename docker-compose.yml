@@ -6,14 +6,14 @@ services:
     container_name: media-tools
     image: media-tools
     ports:
-      - '3000:3000'
-      - '24678:24678'
+      - "3000:3000"
+      - "24678:24678"
     environment:
-      CHOKIDAR_USEPOLLING: 'true'
+      CHOKIDAR_USEPOLLING: "true"
       NODE_ENV: development
       NUXT_HOST: 0.0.0.0
       NUXT_PORT: 3000
-      WATCHPACK_POLLING: 'true'
+      WATCHPACK_POLLING: "true"
     volumes:
       - .:/app
       - media-tools-node-modules:/app/node_modules

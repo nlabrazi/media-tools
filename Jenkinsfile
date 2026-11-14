@@ -14,15 +14,24 @@ pipeline {
             }
         }
 
-        stage('Install') {
+        stage('Notify Renovate PR') {
+            when {
+                changeRequest target: 'staging'
+            }
             steps {
-                sh 'npm ci'
+                notifyRenovatePr()
             }
         }
 
-        stage('Lint') {
+        stage('Install') {
             steps {
-                sh 'npm run lint'
+                npmCi()
+            }
+        }
+
+        stage('Check') {
+            steps {
+                sh 'npm run check'
             }
         }
 

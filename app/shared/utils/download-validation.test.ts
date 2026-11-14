@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  DownloadValidationError,
   assertValidUrlForPlatform,
+  DownloadValidationError,
   isDownloadPlatform,
   normalizeHostname,
 } from './download-validation'

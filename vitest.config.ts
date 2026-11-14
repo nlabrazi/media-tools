@@ -1,14 +1,6 @@
-import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { defineSharedVitestConfig } from '@nlabrazi/config-vitest'
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      '~': fileURLToPath(new URL('./app', import.meta.url)),
-    },
-  },
-  test: {
-    include: ['app/**/*.test.ts', 'server/**/*.test.ts'],
-    exclude: ['tests/e2e/**', 'node_modules/**', '.nuxt/**', '.output/**'],
-  },
+export default defineSharedVitestConfig({
+  rootDir: import.meta.url,
+  include: ['app/**/*.test.ts', 'server/**/*.test.ts'],
 })

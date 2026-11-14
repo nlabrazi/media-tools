@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  InstagramDownloaderError,
   analyzeInstagramDownload,
+  InstagramDownloaderError,
   startInstagramDownload,
 } from './instagram'
 

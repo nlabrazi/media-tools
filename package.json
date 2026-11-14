@@ -7,10 +7,14 @@
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "lint": "biome check .",
-    "format": "biome format . --write",
+    "postinstall": "nuxt prepare",
+    "check": "biome check .",
+    "check:write": "biome check --write .",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
     "typecheck": "nuxi typecheck",
     "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -18,12 +22,12 @@
     "vue": "latest"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@nlabrazi/config-biome": "^0.2.0",
+    "@nlabrazi/config-playwright": "^0.1.0",
+    "@nlabrazi/config-vitest": "^0.1.0",
+    "@nlabrazi/tsconfig": "^0.1.0",
     "@nuxtjs/tailwindcss": "^6.13.2",
-    "@playwright/test": "^1.63.0",
     "@types/node": "^20.19.39",
-    "typescript": "^5.7.0",
-    "vitest": "^4.1.5",
     "vue-tsc": "^3.2.7"
   }
 }
