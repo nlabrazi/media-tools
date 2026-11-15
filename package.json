@@ -18,8 +18,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "nuxt": "^4.0.0",
-    "vue": "latest"
+    "nuxt": "^4.6.4",
+    "vue": "3.5.45"
   },
   "devDependencies": {
     "@nlabrazi/config-biome": "^0.2.0",
@@ -27,7 +27,7 @@
     "@nlabrazi/config-vitest": "^0.1.0",
     "@nlabrazi/tsconfig": "^0.1.0",
     "@nuxtjs/tailwindcss": "^6.13.2",
-    "@types/node": "^20.19.39",
-    "vue-tsc": "^3.2.7"
+    "@types/node": "^20.19.43",
+    "vue-tsc": "^3.3.14"
   }
 }
