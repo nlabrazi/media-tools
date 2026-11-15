@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { YtDlpDownloaderError, prepareYtDlpFormatDownload } from './yt-dlp'
+import { prepareYtDlpFormatDownload, YtDlpDownloaderError } from './yt-dlp'
 
 const execFileMock = vi.hoisted(() => vi.fn())
 const spawnMock = vi.hoisted(() => vi.fn())

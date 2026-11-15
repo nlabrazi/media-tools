@@ -16,13 +16,13 @@ pipeline {
 
         stage('Install') {
             steps {
-                sh 'npm ci'
+                npmCi()
             }
         }
 
-        stage('Lint') {
+        stage('Check') {
             steps {
-                sh 'npm run lint'
+                sh 'npm run check'
             }
         }
 

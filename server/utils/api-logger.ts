@@ -1,5 +1,5 @@
-import { getRequestURL } from 'h3'
 import type { H3Event } from 'h3'
+import { getRequestURL } from 'h3'
 
 type ApiLogLevel = 'error' | 'warn'
 

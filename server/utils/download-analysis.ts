@@ -1,7 +1,7 @@
 import type { DownloadAnalysisRequest, DownloadAnalysisResponse } from '~/shared/types/download'
 import {
-  DownloadValidationError,
   assertValidUrlForPlatform,
+  DownloadValidationError,
   isDownloadPlatform,
 } from '~/shared/utils/download-validation'
 

@@ -7,12 +7,12 @@ import type {
 import { createDownloadStreamToken } from '../download-stream-tokens'
 import type { DownloaderService } from './types'
 import {
-  YtDlpDownloaderError,
-  type YtDlpDownloaderOptions,
   buildYtDlpFilename,
   findMappedFormat,
   getYtDlpMetadata,
   mapYtDlpMetadataToAnalysisResult,
+  YtDlpDownloaderError,
+  type YtDlpDownloaderOptions,
 } from './yt-dlp'
 
 export const TwitterDownloaderError = YtDlpDownloaderError

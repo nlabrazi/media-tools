@@ -1,6 +1,6 @@
 import { createError, readBody } from 'h3'
-import type { DownloadStartRequest, DownloadStartResponse } from '~/shared/types/download'
 import { useRuntimeConfig } from '#imports'
+import type { DownloadStartRequest, DownloadStartResponse } from '~/shared/types/download'
 import { getDownloaderService } from '../../services/downloaders'
 import { UnsupportedDownloaderError } from '../../services/downloaders/unsupported'
 import { YtDlpDownloaderError } from '../../services/downloaders/yt-dlp'
