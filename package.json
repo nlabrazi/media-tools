@@ -14,6 +14,7 @@
     "lint": "biome lint .",
     "typecheck": "nuxi typecheck",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
   },
