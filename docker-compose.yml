@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      secrets:
+        - npmrc
     container_name: media-tools
     image: media-tools
     ports:
@@ -19,6 +21,10 @@ services:
       - media-tools-node-modules:/app/node_modules
       - media-tools-nuxt:/app/.nuxt
     restart: unless-stopped
+
+secrets:
+  npmrc:
+    file: ${NPMRC_FILE:-~/.npmrc}
 
 volumes:
   media-tools-node-modules:
