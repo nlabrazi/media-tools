@@ -3,6 +3,7 @@
   Thème cyberpunk/glassmorphism avec polices modernes.
 */
 export default defineNuxtConfig({
+  extends: ['@nlabrazi/nuxt-layer'],
   compatibilityDate: '2026-04-28',
 
   devtools: { enabled: true },
@@ -19,6 +20,9 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    health: {
+      service: 'media-tools',
+    },
     download: {
       analyzeRateLimit: {
         limit: 10,
@@ -28,6 +32,18 @@ export default defineNuxtConfig({
       ytDlpJsRuntime: `node:${process.execPath}`,
       ytDlpPath: 'yt-dlp',
       ytDlpTimeoutMs: 30_000,
+    },
+    public: {
+      umami: {
+        websiteId: 'e553acee-96cd-42fe-bc38-f9dd9d0b0a2b',
+        domains: 'media-tools.nabster.dev',
+      },
+      site: {
+        name: 'MediaTools',
+        url: 'https://media-tools.nabster.dev',
+        description:
+          'Téléchargez vos vidéos et photos depuis Instagram, TikTok, YouTube et Twitter gratuitement.',
+      },
     },
   },
 
@@ -51,8 +67,6 @@ export default defineNuxtConfig({
     head: {
       title: 'MediaTools — Social Media Downloader',
       meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
           content:
@@ -65,13 +79,6 @@ export default defineNuxtConfig({
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap',
-        },
-      ],
-      script: [
-        {
-          src: 'https://umami.nabster.dev/script.js',
-          defer: true,
-          'data-website-id': 'e553acee-96cd-42fe-bc38-f9dd9d0b0a2b',
         },
       ],
     },
